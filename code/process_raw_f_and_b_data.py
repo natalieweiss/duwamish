@@ -20,17 +20,19 @@ def clean_pcb(val):
         val = val.replace("/"," ").split(" ")[1]
     return val
 
-def main(sample_outing_name, qaqc_path, sample_pts_path, folder_path):
+def main(sample_outing_name, qaqc_path, sample_pts_path, raw_data_path, processed_path):
+    print(f"Processing:{raw_data_path}")
 
     # folder containing spreadsheets from F & B
-    output_results_path = f"/home/nweiss/gdrive/Year 2/Summer - Duwamish/Sampling_Results/{sample_outing_name}_results.csv"
-    qaqc_path = f"/home/nweiss/gdrive/Year 2/Summer - Duwamish/Sampling_Results/qaqc/{sample_outing_name}_qaqc.csv"
+    processed_path = f"{processed_path}/{sample_outing_name}_results.csv"
+    qaqc_file = f"{qaqc_path}/{sample_outing_name}_qaqc.csv"
+    print(qaqc_file)
 
     # PROCESS RESULTS SPREADSHEETS
-    file_extension = '*.xlsx'
+    file_extension = '*.xls'
 
     # List all files with the specified extension in the folder
-    files = glob.glob(os.path.join(folder_path, file_extension))
+    files = glob.glob(os.path.join(raw_data_path, file_extension))
 
     results_df = []
     file_path = []
@@ -40,8 +42,11 @@ def main(sample_outing_name, qaqc_path, sample_pts_path, folder_path):
 
     # Iterate through each file and read its content
     for file in files:
+        print(f"Processing: {file}")
         df = pd.read_excel(file, sheet_name = 'Sheet1')
         df.columns = df.columns.str.replace("_"," ")
+        print(df['Sample ID'].unique())
+        df['Sample ID'] = df['Sample ID'].str.strip()
         results_df.append(df)
 
         try:
@@ -54,22 +59,27 @@ def main(sample_outing_name, qaqc_path, sample_pts_path, folder_path):
             print(file)
 
     results_df = pd.concat(results_df)
+    print(len(results_df))
     results_df['Sample ID'] = results_df['Sample ID'].str.strip()
 
     #### QAQC check to make sure that the sample ids match what is in our sampling sites spreadsheet
     sample_pts_gdf = gp.read_file(sample_pts_path)
     sample_pt_ids = sample_pts_gdf['Sampling ID'].unique()
+    no_match = []
     for f_b_ids in sample_ids:
         for f_b_id in f_b_ids:
             if f_b_id in sample_pt_ids: # check to see if f and b id is found in our master sampling sites
-                print("Match found:", f_b_id)
+                #print("Match found:", f_b_id)
+                continue
             else:
-                print("No match found:", f_b_id)
-                #user_input = input("Continue: y/n?")
-                #if user_input == 'y':
-                #    pass
-                #else:
-                #    raise()
+                #print("No match found:", f_b_id)
+                if ("Method Blank" not in f_b_id):
+                    if f_b_id[0:2] != "0_":
+                        no_match.append(f_b_id)
+    
+    print('No matches found for these IDs:', no_match)
+    if len(no_match)>0:
+        print('Add corrected IDs to the Fixed ID spreadsheet')
 
     #### If an ID from F&B does not match the sampling sites id, replace the sample id here using this syntax
     ### TODO: join and replace from fixed ID spreadsheet
@@ -82,8 +92,6 @@ def main(sample_outing_name, qaqc_path, sample_pts_path, folder_path):
     #### QAQC check to make sure the dates line up
     sample_dates = sample_pts_gdf['Date'].unique()
     f_b_dates = results_df['Field Collection Start Date'].unique()
-    for date in sample_dates:
-        print(date)
 
     #### QAQC: if any dates are mismatched, replace below using the same syntax
     # replace typo from 11/17 -> 11/07
@@ -91,9 +99,13 @@ def main(sample_outing_name, qaqc_path, sample_pts_path, folder_path):
 
     # remove any rows that were not field data
     results_df =  results_df[results_df['Field Collection Start Date'].isna() == False]
+    file_path.append(processed_path)
+    records.append(len(results_df))
+    sample_ids.append(results_df['Sample ID'].unique())
+    methods.append(results_df['Result Method'].unique())
     qaqc = {'file_path': file_path, 'records': records, 'sample_ids': sample_ids, 'method': methods}
     qaqc_df = pd.DataFrame(data = qaqc)
-    qaqc_df.to_csv(qaqc_path, index = False)
+    qaqc_df.to_csv(qaqc_file, index = False)
 
     # create new column of sample type based on sample matrix and sample source columns
     results_df['Sample Matrix_clean'] = np.where(results_df['Sample Matrix']=='Aqueous', 'Water', results_df['Sample Matrix'])
@@ -121,4 +133,4 @@ def main(sample_outing_name, qaqc_path, sample_pts_path, folder_path):
                             'Result Parameter Name','Result Parameter Name_clean','Result Value', 'Result Value Units', 'Result Reporting Limit', 
                             'Result Reporting Limit Type', 'Result Detection Limit','Result Detection Limit Type', 'Result Data Qualifier', 'Result Method']]
 
-    results_df.to_csv(output_results_path, index = False)
+    results_df.to_csv(processed_path, index = False)

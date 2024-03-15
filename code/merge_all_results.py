@@ -5,12 +5,14 @@ from datetime import date
 import glob
 import os
 
-def main(output_file_name, results_folder_path):
+def main(processed_path):
+    output_file_name = "agg_results"
+
     # bring in all results with just screening levels
     file_extension = '*.csv'
 
     # List all files with the specified extension in the folder
-    files = os.listdir(results_folder_path)
+    files = os.listdir(processed_path)
 
     sl_results = []
     sl_geom_results = []
@@ -18,10 +20,10 @@ def main(output_file_name, results_folder_path):
     # Iterate through each file and read its content
     for file_path in files:
         if "joined_SL" in file_path:
-            df = pd.read_csv(results_folder_path + '/' + file_path)
+            df = pd.read_csv(processed_path + '/' + file_path)
             sl_results.append(df)
         if "join_geometry" in file_path:
-            df = pd.read_csv(results_folder_path + '/' + file_path)
+            df = pd.read_csv(processed_path + '/' + file_path)
             sl_geom_results.append(df)
 
     sl_results = pd.concat(sl_results)
@@ -34,7 +36,9 @@ def main(output_file_name, results_folder_path):
     cols = cols.insert(loc = len(cols), item =['Latitude','Longitude'])
 
 
-    sl_results.to_csv(results_folder_path + '/' + output_file_name + '.csv', index = False)
+    sl_results.to_csv(processed_path + '/' + output_file_name + '.csv', index = False)
+
+    return sl_results
 
     # keep RCRA8 metals separate
     # sl_geom_results['Chemical Group'] = np.where(sl_geom_results['Chemical Group'] == 'RCRA8', sl_geom_results['Chemical'], sl_geom_results['Chemical Group'])
@@ -47,5 +51,5 @@ def main(output_file_name, results_folder_path):
     sample_pollutant_test.drop_duplicates(subset=['DATE','Sample ID','Medium','Chemical Group','Latitude','Longitude'], inplace = True)
 
 
-    sample_pollutant_test.to_csv(results_folder_path + '/'  + output_file_name + "_geom_pollutant_screens.csv", index = False)
+    #sample_pollutant_test.to_csv(results_folder_path + '/'  + output_file_name + "_geom_pollutant_screens.csv", index = False)
 
