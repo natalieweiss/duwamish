@@ -20,6 +20,8 @@ def main(sample_outing_name, processed_path, qaqc_path, sl_path, pcb_arc_lookup_
     # create file paths
     if os.path.exists(f"{processed_path}/{sample_outing_name}_w_df_results.csv"):
         input_results_path = f"{processed_path}/{sample_outing_name}_w_df_results.csv"
+    elif sample_outing_name == 'prev_results':
+        input_results_path = f"{processed_path}/{sample_outing_name}.csv"
     else:
         input_results_path = f"{processed_path}/{sample_outing_name}_results.csv"
 
@@ -79,7 +81,7 @@ def main(sample_outing_name, processed_path, qaqc_path, sl_path, pcb_arc_lookup_
     #sl['Chemical'] = np.where(sl['Chemical Group']== 'Dioxin Furans', sl['Chemical'].str.replace(',',''), sl['Chemical'])
 
     # strip pcbs of their commas to match the results spreadsheet
-    sl['Chemical'] = np.where(sl['Chemical Group']== 'PCB', sl['Chemical'].str.replace(',',''), sl['Chemical'])
+    sl['Chemical_fmt'] = np.where(sl['Chemical Group']== 'PCB', sl['Chemical'].str.replace(',',''), sl['Chemical'])
 
 
     # JOIN SCREENING LEVELS TO RESULTS
@@ -89,13 +91,13 @@ def main(sample_outing_name, processed_path, qaqc_path, sl_path, pcb_arc_lookup_
     pcb_arc_lookup['PCB Isomer'] = pcb_arc_lookup['PCB Isomer'].str.replace(",","")
 
     # replace pcb names with the aroclor names to match with F&B results
-    sl_arc_join = pd.merge(sl, pcb_arc_lookup, how = 'outer', left_on = 'Chemical', right_on = 'PCB Isomer')
-    sl_arc_join['Chemical'] = np.where(sl_arc_join['Aroclor Name'].str.contains('aroclor', na=False),sl_arc_join['Aroclor Name'], sl_arc_join['Chemical'])
+    sl_arc_join = pd.merge(sl, pcb_arc_lookup, how = 'outer', left_on = 'Chemical_fmt', right_on = 'PCB Isomer')
+    sl_arc_join['Chemical_fmt'] = np.where(sl_arc_join['Aroclor Name'].str.contains('aroclor', na=False),sl_arc_join['Aroclor Name'], sl_arc_join['Chemical_fmt'])
 
     results_df['Result Parameter Name_clean'] = np.where(results_df['Result Parameter Name_clean'].isna(), results_df['Result Parameter Name'], results_df['Result Parameter Name_clean'])
 
     # join screening levels to the results
-    sl_results_join = pd.merge(sl_arc_join, results_df, how = 'outer', left_on = ['Chemical','Medium'], right_on = ['Result Parameter Name_clean','Sample Matrix_clean'])
+    sl_results_join = pd.merge(sl_arc_join, results_df, how = 'outer', left_on = ['Chemical_fmt','Medium'], right_on = ['Result Parameter Name_clean','Sample Matrix_clean'])
 
     # calculate whether the screening levels have been exceeded
     sl_results_join['SL_exceeded'] = np.where(sl_results_join['Screening Level'] < sl_results_join['Result Value'],'Y','N')
@@ -111,7 +113,7 @@ def main(sample_outing_name, processed_path, qaqc_path, sl_path, pcb_arc_lookup_
 
 
     sl_results_join['Medium'] = np.where(sl_results_join['Medium'].isna() == True, sl_results_join['Sample Matrix_clean'], sl_results_join['Medium'])
-    sl_results_join['Chemical'] = np.where(sl_results_join['Chemical'].isna() == True, sl_results_join['Result Parameter Name'], sl_results_join['Chemical'])
+    sl_results_join['Chemical_fmt'] = np.where(sl_results_join['Chemical_fmt'].isna() == True, sl_results_join['Result Parameter Name'], sl_results_join['Chemical_fmt'])
 
 
     # CALCUALTE MOST STRINGENT AND COUNT OF STRINGENT EXCEEDED
@@ -123,11 +125,11 @@ def main(sample_outing_name, processed_path, qaqc_path, sl_path, pcb_arc_lookup_
     sl_arc_join['Screening Level'] = sl_arc_join['Screening Level'].astype(float)
 
     # find the most stringent screening level for each scenario
-    sl_stringent = sl_arc_join.groupby(by =['Medium', 'Chemical Group', 'Chemical', 'Scenario']).agg({'Screening Level': ['min']}).reset_index()
+    sl_stringent = sl_arc_join.groupby(by =['Medium', 'Chemical Group', 'Chemical_fmt', 'Scenario']).agg({'Screening Level': ['min']}).reset_index()
     sl_stringent = drop_levels(sl_stringent)
 
     #For the results that signify most stringent, add column indicating stringent value for filtering
-    sl_results_join = sl_results_join.merge(sl_stringent, how = 'left', indicator = True, on = ['Medium', 'Chemical Group', 'Chemical', 'Scenario'])
+    sl_results_join = sl_results_join.merge(sl_stringent, how = 'left', indicator = True, on = ['Medium', 'Chemical Group', 'Chemical_fmt', 'Scenario'])
     sl_results_join['stringent_ind'] = np.where(sl_results_join['_merge']=='both', 'Stringent','')
 
 
