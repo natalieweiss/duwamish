@@ -16,12 +16,12 @@ def make_pivot(df, med, group, name):
     df = df[(df['Chemical Group']==group)]
     df = df[df['Medium']==med]
     df['Screening Level'] = df['Screening Level'].astype(float).apply(lambda x: round(x, 2 - int(floor(log10(abs(x))))) if x > 0 else 0)
-
+    
     df.drop_duplicates(inplace = True)
     df.sort_values(by = 'Sample ID')
     df.set_index(['Sample ID', 'DATE'], append=True, inplace = True)
 
-    pivot_df = df.pivot(columns=['Chemical Group', 'Chemical','Source', 'Screening Level', 'SL Unit'], values='SL_exceeded')
+    pivot_df = df.pivot(columns=['Chemical Group', 'Chemical','Reference', 'Screening Level', 'SL Unit'], values='SL_exceeded')
     pivot_df = pivot_df.groupby(['Sample ID', 'DATE']).agg(max)
     pivot_df.replace({1:"Y", 0:"N"}, inplace = True)
     if len(pivot_df)>0:
@@ -34,7 +34,7 @@ def make_pivot(df, med, group, name):
 
 ######### Tree Planting Event ###################
 tree_planting_ids = ['GUF-1-S-1', 'GUF-1-S-2', 'GUF-1-S-3', 'GUF-1-S-4']
-all_results = merge_all_results.main(processed_path = processed_folder)
+all_results = pd.read_csv(f"{processed_folder}/agg_results.csv")
 
 tree_planting = []
 for sample_id in tree_planting_ids:
@@ -52,12 +52,14 @@ with pd.ExcelWriter(f"{processed_folder}/tree_planting_event.xlsx", mode = 'a', 
 for group in chemical_groups:
     for med in medium:
         make_pivot(df=tree_planting, med=med, group=group, name='tree_planting')
+        make_pivot(df=tree_planting, med=med, group=group, name='tree_planting')
 
 
 ######### Bioswale Event ###################
 
-bioswale_event_dates = ['2024-01-18', '2024-01-21','2024-02-16']
+bioswale_event_dates = ['2024-01-18', '2024-01-21','2024-02-15', '2024-02-16']
 bioswale_event = []
+all_results['DATE'] = all_results['DATE'].str[:10]
 for bioswale_date in bioswale_event_dates:
     df = all_results[all_results['DATE'] == bioswale_date]
     bioswale_event.append(df)

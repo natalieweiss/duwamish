@@ -31,7 +31,7 @@ def main(sample_outing_name, processed_path, sample_pts_path):
     # read in processed results
     screening_results = pd.read_csv(input_results_path)
     cols = screening_results.columns.to_list()
-    cols += ['Latitude', 'Longitude', 'Description']
+    cols += ['Latitude', 'Longitude', 'Description', 'MILE']
 
     # strip all sample ids of leading spaces
     screening_results['Sample ID'] = screening_results['Sample ID'].str.strip()
@@ -51,7 +51,6 @@ def main(sample_outing_name, processed_path, sample_pts_path):
     # replace date for BIS-1-2 from 11/9/2023 to 11/8/2023
     screening_results['DATE'] = np.where(screening_results['Sample ID'] == 'BIS-1-2', np.datetime64(date(2023, 11, 8)), screening_results['DATE'])
     sample_pts_gdf["Date"] = pd.to_datetime(sample_pts_gdf["Date"], format='mixed')
-
 
     sample_pts_join_results = pd.merge(screening_results, sample_pts_gdf, left_on = ['Sample ID', 'DATE'], right_on = ['Sampling ID_match_fb', 'Date'], how = 'left')
     sample_pts_join_results.rename(columns = {'Medium_x':'Medium'}, inplace = True)

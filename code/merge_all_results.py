@@ -33,10 +33,10 @@ def main(processed_path):
     sl_geom_results = sl_geom_results[sl_geom_results['Result Value'].isna()==False]
 
     cols = sl_results.columns
-    cols = cols.insert(loc = len(cols), item =['Latitude','Longitude'])
-
+    cols = cols.insert(loc = len(cols), item =['Latitude','Longitude','MILE'])
 
     sl_results.to_csv(processed_path + '/' + output_file_name + '.csv', index = False)
+    sl_geom_results.to_csv(processed_path + '/' + output_file_name + '_geom.csv', index = False)
 
     return sl_results
 

@@ -17,6 +17,7 @@ def drop_levels(df):
 # a list of all chemicals with tests that have been run
 
 def main(sample_outing_name, processed_path, qaqc_path, sl_path, pcb_arc_lookup_path):
+
     # create file paths
     if os.path.exists(f"{processed_path}/{sample_outing_name}_w_df_results.csv"):
         input_results_path = f"{processed_path}/{sample_outing_name}_w_df_results.csv"
@@ -26,7 +27,7 @@ def main(sample_outing_name, processed_path, qaqc_path, sl_path, pcb_arc_lookup_
         input_results_path = f"{processed_path}/{sample_outing_name}_results.csv"
 
     output_results_path = f"{sample_outing_name}_results_joined_SL"
-
+    
     results_df = pd.read_csv(input_results_path)
 
     #convert units from pg/L -> ug/L
@@ -56,8 +57,10 @@ def main(sample_outing_name, processed_path, qaqc_path, sl_path, pcb_arc_lookup_
     sl = sl[(sl['Screening Level']!='TBD')]
     sl = sl[(sl['Screening Level']!='PQL')]
     sl = sl[(sl['Screening Level'].isna()==False)]
+    sl['Screening Level'] = np.where(sl['Screening Level'] =='Present', 0, sl['Screening Level'])
 
-    #sl['Screening Level'] = float(sl['Screening Level'])
+
+    sl['Screening Level'] = sl['Screening Level'].astype(float)
     sl['Screening Level'] = np.where(sl['SL Unit'] =='mg/L', sl['Screening Level']/1000, sl['Screening Level'])
     sl['SL Unit'] = np.where(sl['SL Unit']=='mg/L', 'ug/L', sl['SL Unit'])
 
@@ -78,7 +81,7 @@ def main(sample_outing_name, processed_path, qaqc_path, sl_path, pcb_arc_lookup_
     sl_qaqc.to_csv(f"{qaqc_path}/screening_levels_identified.csv", index = False)
 
     # strip dioxin furans screening levels of their commas to match the results spreadsheet
-    #sl['Chemical'] = np.where(sl['Chemical Group']== 'Dioxin Furans', sl['Chemical'].str.replace(',',''), sl['Chemical'])
+    sl['Chemical'] = np.where(sl['Chemical Group']== 'Dioxin Furans', sl['Chemical'].str.replace(',',''), sl['Chemical'])
 
     # strip pcbs of their commas to match the results spreadsheet
     sl['Chemical_fmt'] = np.where(sl['Chemical Group']== 'PCB', sl['Chemical'].str.replace(',',''), sl['Chemical'])
@@ -101,7 +104,6 @@ def main(sample_outing_name, processed_path, qaqc_path, sl_path, pcb_arc_lookup_
 
     # calculate whether the screening levels have been exceeded
     sl_results_join['SL_exceeded'] = np.where(sl_results_join['Screening Level'] < sl_results_join['Result Value'],'Y','N')
-
     sl_results_join['SL_diff'] = sl_results_join['Result Value'] - sl_results_join['Screening Level']
 
     # where the screening level is blank, replace exceedance with "no screening level identified"
@@ -136,8 +138,10 @@ def main(sample_outing_name, processed_path, qaqc_path, sl_path, pcb_arc_lookup_
     sl_results_join.drop(columns = 'Screening Level_y', inplace = True)
     sl_results_join.rename(columns = {'Screening Level_x':'Screening Level'}, inplace = True)
 
+    sl_results_join['Chemical'] = np.where(sl_results_join['Screening Level']=='No Screening Level Identified', sl_results_join['Result Parameter Name'], sl_results_join['Chemical'])
+
     columns = ['DATE','Sample ID','Medium', 'Chemical Group', 'Chemical', 'Land Use', 'Target Receptor', 'Transport Pathway', 'Exposure Pathway', 'Screening Level', 'SL Unit',
-        'Source', 'Result Value','Result Value Units','SL_exceeded', 'SL_diff','stringent_ind']
+        'Source', 'Source Number','Reference', 'Result Value','Result Value Units','SL_exceeded', 'SL_diff','stringent_ind']
 
     sl_results_join[columns].to_csv(f'{processed_path}/{output_results_path}.csv', index = False)
 

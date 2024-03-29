@@ -26,7 +26,6 @@ def main(sample_outing_name, qaqc_path, sample_pts_path, raw_data_path, processe
     # folder containing spreadsheets from F & B
     processed_path = f"{processed_path}/{sample_outing_name}_results.csv"
     qaqc_file = f"{qaqc_path}/{sample_outing_name}_qaqc.csv"
-    print(qaqc_file)
 
     # PROCESS RESULTS SPREADSHEETS
     file_extension = '*.xls'
@@ -45,7 +44,6 @@ def main(sample_outing_name, qaqc_path, sample_pts_path, raw_data_path, processe
         print(f"Processing: {file}")
         df = pd.read_excel(file, sheet_name = 'Sheet1')
         df.columns = df.columns.str.replace("_"," ")
-        print(df['Sample ID'].unique())
         df['Sample ID'] = df['Sample ID'].str.strip()
         results_df.append(df)
 
@@ -56,10 +54,9 @@ def main(sample_outing_name, qaqc_path, sample_pts_path, raw_data_path, processe
             records.append(len(df))
             methods.append(list(df['Result Method'].unique()))
         except:
-            print(file)
+            continue
 
     results_df = pd.concat(results_df)
-    print(len(results_df))
     results_df['Sample ID'] = results_df['Sample ID'].str.strip()
 
     #### QAQC check to make sure that the sample ids match what is in our sampling sites spreadsheet
@@ -78,6 +75,9 @@ def main(sample_outing_name, qaqc_path, sample_pts_path, raw_data_path, processe
                         no_match.append(f_b_id)
     
     print('No matches found for these IDs:', no_match)
+    if len(no_match)>0:
+        pd.DataFrame(no_match).drop_duplicates().to_csv(f"{qaqc_path}/{sample_outing_name}_missing_IDs.csv")
+
     if len(no_match)>0:
         print('Add corrected IDs to the Fixed ID spreadsheet')
 
