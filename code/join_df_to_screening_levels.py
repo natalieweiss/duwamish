@@ -19,9 +19,7 @@ def drop_levels(df):
 def main(sample_outing_name, processed_path, qaqc_path, sl_path, pcb_arc_lookup_path):
 
     # create file paths
-    if sample_outing_name == 'prev_results':
-        input_results_path = f"{processed_path}/{sample_outing_name}.csv"
-    else:
+    if os.path.exists(f"{processed_path}/{sample_outing_name}_results.csv"):
         input_results_path = f"{processed_path}/{sample_outing_name}_results.csv"
 
     output_results_path = f"{sample_outing_name}_results_joined_SL"

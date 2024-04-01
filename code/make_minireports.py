@@ -32,6 +32,26 @@ def make_pivot(df, med, group, name):
             print(group, med)
             print(e)
 
+# create mini reports
+def make_result_pivot(df, med, group, name):
+    df = df[(df['Chemical Group']==group)]
+    df = df[df['Medium']==med]
+    df['Screening Level'] = df['Screening Level'].astype(float).apply(lambda x: round(x, 2 - int(floor(log10(abs(x))))) if x > 0 else 0)
+    
+    df.drop_duplicates(inplace = True)
+    df.sort_values(by = 'Sample ID')
+    df.set_index(['Sample ID', 'DATE'], append=True, inplace = True)
+
+    pivot_df = df.pivot(columns=['Chemical Group', 'Chemical'], values='Result Value')
+    pivot_df = pivot_df.groupby(['Sample ID', 'DATE']).agg(max)
+    if len(pivot_df)>0:
+        try:
+            with pd.ExcelWriter(f"{processed_folder}/{name}_event.xlsx", mode = 'a', if_sheet_exists='replace') as writer: 
+                pivot_df.to_excel(writer, sheet_name = f'PIVOT_{group}_{med}')
+        except Exception as e:
+            print(group, med)
+            print(e)
+
 ######### Tree Planting Event ###################
 tree_planting_ids = ['GUF-1-S-1', 'GUF-1-S-2', 'GUF-1-S-3', 'GUF-1-S-4']
 all_results = pd.read_csv(f"{processed_folder}/agg_results.csv")
@@ -51,8 +71,8 @@ with pd.ExcelWriter(f"{processed_folder}/tree_planting_event.xlsx", mode = 'a', 
 
 for group in chemical_groups:
     for med in medium:
-        make_pivot(df=tree_planting, med=med, group=group, name='tree_planting')
-        make_pivot(df=tree_planting, med=med, group=group, name='tree_planting')
+        #make_pivot(df=tree_planting, med=med, group=group, name='tree_planting')
+        make_result_pivot(df=tree_planting, med=med, group=group, name='tree_planting')
 
 
 ######### Bioswale Event ###################
@@ -74,5 +94,6 @@ with pd.ExcelWriter(f"{processed_folder}/bioswale_event.xlsx", mode = 'a', if_sh
 
 for group in chemical_groups:
     for med in medium:
-        make_pivot(df=bioswale_event, med=med, group=group, name='bioswale')
+        #make_pivot(df=bioswale_event, med=med, group=group, name='bioswale')
+        make_result_pivot(df=bioswale_event, med=med, group=group, name='bioswale')
 
