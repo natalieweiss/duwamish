@@ -11,7 +11,8 @@ def main(sample_outing_name, processed_path, sample_pts_path):
     sample_pts = pd.read_csv(sample_pts_path)
     sample_pts_gdf = gp.GeoDataFrame(sample_pts, geometry=gp.points_from_xy(sample_pts.Longitude, sample_pts.Latitude), crs="EPSG:4326")
 
-    ## TODO: replace all fixed IDs in the processing raw_f_and_b.py script as teh first step
+    ## TODO: replace all fixed IDs in the processing raw_f_and_b.py script as the first step
+    ## TODO: replace all dates to match the date in the master sampling spreadsheet
     # replace SI-W-2 to S1-W-2 to match results spreadsheet
     sample_pts_gdf['Sampling ID_match_fb'] = np.where(sample_pts_gdf['Sampling ID'] == 'SI-W-2', 'S1-W-2', sample_pts_gdf['Sampling ID'])
 

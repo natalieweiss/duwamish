@@ -115,9 +115,8 @@ def main(sample_outing_name, qaqc_path, sample_pts_path, raw_data_path, processe
     # clean up pcb values in order to make the join correctly with screening levels
     results_df['Result Parameter Name_clean'] = results_df['Result Parameter Name'].apply(lambda x: clean_pcb(x))
 
-    # clean up d/f results to join correctly with screening levels
     # replace Lube Oil to Diesel Range Organics
-    results_df['Result Parameter Name_clean'] = np.where(results_df['Result Parameter Name_clean'] == 'Lube Oil', 'Diesel Range Organics', results_df['Result Parameter Name_clean'])
+    results_df['Result Parameter Name_clean'] = np.where(results_df['Result Parameter Name_clean'] == 'Lube Oil', 'Motor Oil', results_df['Result Parameter Name_clean'])
 
     # calculate total PCBs for epa1668
     tot_pcbs = results_df[results_df['Result Method'] == 'EPA1668C']

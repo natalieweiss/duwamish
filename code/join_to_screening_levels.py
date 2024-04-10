@@ -55,21 +55,21 @@ def main(sample_outing_name, processed_path, qaqc_path, sl_path, pcb_arc_lookup_
     sl = sl[(sl['Screening Level']!='TBD')]
     sl = sl[(sl['Screening Level']!='PQL')]
     sl = sl[(sl['Screening Level'].isna()==False)]
-    sl['Screening Level'] = np.where(sl['Screening Level'] =='Present', 0, sl['Screening Level'])
+    sl['Screening Level'] = np.where(sl['Screening Level'] == 'Present', 0, sl['Screening Level'])
 
 
     sl['Screening Level'] = sl['Screening Level'].astype(float)
-    sl['Screening Level'] = np.where(sl['SL Unit'] =='mg/L', sl['Screening Level']/1000, sl['Screening Level'])
+    sl['Screening Level'] = np.where((sl['SL Unit'] =='mg/L')  & (sl['Medium'] =='Water'), sl['Screening Level']/1000, sl['Screening Level'])
     sl['SL Unit'] = np.where(sl['SL Unit']=='mg/L', 'ug/L', sl['SL Unit'])
 
-    sl['Screening Level'] = np.where(sl['SL Unit'] =='ppb', sl['Screening Level'], sl['Screening Level'])
+    sl['Screening Level'] = np.where((sl['SL Unit'] =='ppb') & (sl['Medium'] =='Water'), sl['Screening Level'], sl['Screening Level'])
     sl['SL Unit'] = np.where(sl['SL Unit']=='ppb', 'ug/L', sl['SL Unit'])
 
     sl['Screening Level'] = np.where(sl['SL Unit'] =='ppm', sl['Screening Level']/1000, sl['Screening Level'])
     sl['SL Unit'] = np.where(sl['SL Unit']=='ppm', 'ug/L', sl['SL Unit'])
 
-    sl['Screening Level'] = np.where((sl['SL Unit'] =='ppb') & (sl['Medium'] =='Water'), sl['Screening Level']/1000, sl['Screening Level'])
-    sl['SL Unit'] = np.where(sl['SL Unit'] =='ppb', 'mg/kg', sl['SL Unit'])
+    sl['Screening Level'] = np.where((sl['SL Unit'] =='ppb') & (sl['Medium'] =='Soil'), sl['Screening Level']*0.001, sl['Screening Level'])
+    sl['SL Unit'] = np.where((sl['SL Unit'] =='ppb') & (sl['Medium'] =='Soil'), 'mg/kg', sl['SL Unit'])
 
 
     print(sl['Screening Level'].dtype)
@@ -101,7 +101,7 @@ def main(sample_outing_name, processed_path, qaqc_path, sl_path, pcb_arc_lookup_
     sl_results_join = pd.merge(sl_arc_join, results_df, how = 'outer', left_on = ['Chemical_fmt','Medium'], right_on = ['Result Parameter Name_clean','Sample Matrix_clean'])
 
     # calculate whether the screening levels have been exceeded
-    sl_results_join['SL_exceeded'] = np.where(sl_results_join['Screening Level'] < sl_results_join['Result Value'],'Y','N')
+    sl_results_join['SL_exceeded'] = np.where(sl_results_join['Screening Level'] <= sl_results_join['Result Value'],'Y','N')
     sl_results_join['SL_diff'] = sl_results_join['Result Value'] - sl_results_join['Screening Level']
 
     # where the screening level is blank, replace exceedance with "no screening level identified"
@@ -138,10 +138,16 @@ def main(sample_outing_name, processed_path, qaqc_path, sl_path, pcb_arc_lookup_
 
     sl_results_join['Chemical'] = np.where(sl_results_join['Screening Level']=='No Screening Level Identified', sl_results_join['Result Parameter Name'], sl_results_join['Chemical'])
 
-    columns = ['DATE','Sample ID','Medium', 'Chemical Group', 'Chemical', 'Land Use', 'Target Receptor', 'Transport Pathway', 'Exposure Pathway', 'Screening Level', 'SL Unit',
-        'Source', 'Source Number','Reference', 'Result Value','Result Value Units','SL_exceeded', 'SL_diff','stringent_ind']
+    try:
+        columns = ['DATE','Sample ID','Medium', 'Chemical Group', 'Chemical', 'Land Use', 'Target Receptor', 'Transport Pathway', 'Exposure Pathway', 'Scenario', 'Pathway_for_Report', 'Screening Level', 'SL Unit',
+            'Source', 'Source Number','Reference', 'Result Value','Result Value Units','Result Data Qualifier', 'SL_exceeded', 'SL_diff','stringent_ind']
+        sl_results_join[columns].to_csv(f'{processed_path}/{output_results_path}.csv', index = False)
+    except:
+        columns = ['DATE','Sample ID','Medium', 'Chemical Group', 'Chemical', 'Land Use', 'Target Receptor', 'Transport Pathway', 'Exposure Pathway', 'Scenario', 'Pathway_for_Report', 'Screening Level', 'SL Unit',
+        'Source', 'Source Number','Reference', 'Result Value','Result Value Units','SL_exceeded','SL_diff','stringent_ind']
+        sl_results_join[columns].to_csv(f'{processed_path}/{output_results_path}.csv', index = False)
 
-    sl_results_join[columns].to_csv(f'{processed_path}/{output_results_path}.csv', index = False)
+    #sl_results_join[columns].to_csv(f'{processed_path}/{output_results_path}.csv', index = False)
 
     qaqc_df = sl_results_join[sl_results_join['Screening Level'] != 'No Screening Level Identified']
     qaqc_df= qaqc_df[['DATE','Sample ID', 'Medium', 'Chemical Group','Chemical','Result Value']]

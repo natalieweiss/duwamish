@@ -115,6 +115,7 @@ def main(processed_path, prev_wb_path):
             soil_pcb_df.rename(columns = {"PCB Isomer": 'variable'}, inplace = True)
             soil_pcb_df['Result Value Units'] = 'mg/kg'
             soil_pcb_df['Sample Matrix'] = 'Soil'
+            soil_pcb_df['PCB_flag'] = 1
             soil_pcb = pd.concat([soil_pcb, soil_pcb_df], ignore_index= True)
         except:
             print(i, "no sheet found")
@@ -134,6 +135,7 @@ def main(processed_path, prev_wb_path):
             water_pcb_df.rename(columns = {"PCB Isomer": 'variable'}, inplace = True)
             water_pcb_df['Result Value Units'] = 'ug/L'
             water_pcb_df['Sample Matrix'] = 'Water'
+            water_pcb_df['PCB_flag'] = 1
             water_pcb = pd.concat([water_pcb, water_pcb_df], ignore_index= True)
         except Exception as e:
             print(i, "no sheet found")
@@ -156,12 +158,13 @@ def main(processed_path, prev_wb_path):
     all_results['Result Parameter Name_clean'] = np.where(all_results['Result Parameter Name_clean'] == 'Lube Oil', 'Diesel Range Organics', all_results['Result Parameter Name_clean'])
 
     # calculate total PCBs for epa1668
-    #tot_pcbs = all_results[all_results['Result Method'] == 'EPA1668C']
-    #tot_pcbs = tot_pcbs.groupby(by =['Sample ID', 'Field Collection Start Date', 'Sample Matrix', 'Sample Matrix_clean','Result Value Units']).agg({'Result Value': ['sum']}).reset_index()
+    tot_pcbs = all_results[all_results['PCB_flag'] == 1]
+    tot_pcbs = tot_pcbs.groupby(by =['Sample ID', 'DATE', 'Sample Matrix_clean','Result Value Units']).agg({'Result Value': ['sum']}).reset_index()
 
-    #drop_levels(tot_pcbs)
-    #tot_pcbs['Result Parameter Name_clean'] = 'Total PCBs'
+    drop_levels(tot_pcbs)
+    tot_pcbs['Result Parameter Name_clean'] = 'Total PCBs'
 
     # export compiled results
+    all_results = pd.concat([all_results, tot_pcbs])
     all_results.to_csv(output_results_path,index = False)
 

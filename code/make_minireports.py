@@ -21,7 +21,7 @@ def make_pivot(df, med, group, name):
     df.sort_values(by = 'Sample ID')
     df.set_index(['Sample ID', 'DATE'], append=True, inplace = True)
 
-    pivot_df = df.pivot(columns=['Chemical Group', 'Chemical','Reference', 'Screening Level', 'SL Unit'], values='SL_exceeded')
+    pivot_df = df.pivot(columns=['Chemical Group', 'Chemical','Reference', 'Scenario','Screening Level', 'SL Unit'], values='SL_exceeded')
     pivot_df = pivot_df.groupby(['Sample ID', 'DATE']).agg(max)
     pivot_df.replace({1:"Y", 0:"N"}, inplace = True)
     if len(pivot_df)>0:
@@ -46,7 +46,7 @@ def make_result_pivot(df, med, group, name):
     pivot_df = pivot_df.groupby(['Sample ID', 'DATE']).agg(max)
     if len(pivot_df)>0:
         try:
-            with pd.ExcelWriter(f"{processed_folder}/{name}_event.xlsx", mode = 'a', if_sheet_exists='replace') as writer: 
+            with pd.ExcelWriter(f"{processed_folder}/{name}_event_RESULTS.xlsx", mode = 'a', if_sheet_exists='replace') as writer: 
                 pivot_df.to_excel(writer, sheet_name = f'PIVOT_{group}_{med}')
         except Exception as e:
             print(group, med)
@@ -65,13 +65,18 @@ tree_planting = pd.concat(tree_planting)
 tree_planting['SL_exceeded'] = np.where(tree_planting['SL_exceeded'] == 'Y', 1, 0)
 chemical_groups = ['Dioxin Furans', 'PCB', 'RCRA8', 'TPH', 'PAH']
 medium = ['Soil', 'Water']
+
 tree_planting.to_excel(f"{processed_folder}/tree_planting_event.xlsx", index = False, sheet_name = 'RAW_DATA')
 with pd.ExcelWriter(f"{processed_folder}/tree_planting_event.xlsx", mode = 'a', if_sheet_exists='replace') as writer: 
     tree_planting.to_excel(writer, sheet_name = 'RAW_DATA')
 
+tree_planting.to_excel(f"{processed_folder}/tree_planting_event_RESULTS.xlsx", index = False, sheet_name = 'RAW_DATA')
+with pd.ExcelWriter(f"{processed_folder}/tree_planting_event_RESULTS.xlsx", mode = 'a', if_sheet_exists='replace') as writer: 
+    tree_planting.to_excel(writer, sheet_name = 'RAW_DATA')
+
 for group in chemical_groups:
     for med in medium:
-        #make_pivot(df=tree_planting, med=med, group=group, name='tree_planting')
+        make_pivot(df=tree_planting, med=med, group=group, name='tree_planting')
         make_result_pivot(df=tree_planting, med=med, group=group, name='tree_planting')
 
 
@@ -92,8 +97,12 @@ bioswale_event.to_excel(f"{processed_folder}/bioswale_event.xlsx", sheet_name = 
 with pd.ExcelWriter(f"{processed_folder}/bioswale_event.xlsx", mode = 'a', if_sheet_exists='replace') as writer: 
     bioswale_event.to_excel(writer, sheet_name = 'RAW_DATA', index = False)
 
+bioswale_event.to_excel(f"{processed_folder}/bioswale_event_RESULTS.xlsx", sheet_name = 'RAW_DATA', index = False)
+with pd.ExcelWriter(f"{processed_folder}/bioswale_event_RESULTS.xlsx", mode = 'a', if_sheet_exists='replace') as writer: 
+    bioswale_event.to_excel(writer, sheet_name = 'RAW_DATA', index = False)
+
 for group in chemical_groups:
     for med in medium:
-        #make_pivot(df=bioswale_event, med=med, group=group, name='bioswale')
+        make_pivot(df=bioswale_event, med=med, group=group, name='bioswale')
         make_result_pivot(df=bioswale_event, med=med, group=group, name='bioswale')
 
