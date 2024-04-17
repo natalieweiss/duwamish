@@ -79,7 +79,7 @@ def main(sample_outing_name, qaqc_path, sample_pts_path, fixed_id_path, raw_data
 
     # Check against the Master Sampling Sites spreadsheet to see if the IDs match F&B
     # If there is a match that is incorrect, add the ID to the Fixed IDs sheet
-    sample_pts_gdf = gp.read_file(sample_pts_path) # sampl
+    sample_pts_gdf = pd.read_excel(sample_pts_path, sheet_name='Sample_Locations')
     sample_pt_ids = sample_pts_gdf['Sampling ID'].unique()
     no_match = []
     for f_b_ids in sample_ids:
@@ -131,7 +131,7 @@ def main(sample_outing_name, qaqc_path, sample_pts_path, fixed_id_path, raw_data
     # replace Lube Oil to Motor Oil to match the screening level spreadsheet
     results_df['Result Parameter Name_clean'] = np.where(results_df['Result Parameter Name_clean'] == 'Lube Oil', 'Motor Oil', results_df['Result Parameter Name_clean'])
 
-    # calculate total PCBs for epa1668
+    # calculate total PCBs for method epa1668
     tot_pcbs = results_df[results_df['Result Method'] == 'EPA1668C']
     tot_pcbs = tot_pcbs.groupby(by =['Sample ID', 'Field Collection Start Date', 'Sample Matrix', 'Sample Matrix_clean','Result Value Units']).agg({'Result Value': ['sum']}).reset_index()
     drop_levels(tot_pcbs)

@@ -11,11 +11,11 @@ folder_path = "/home/nweiss/gdrive/Year 2/Summer - Duwamish/Results_NEW"
 lookup_folder = os.path.join(folder_path, "Lookup")
 processed_folder = os.path.join(folder_path, "Processed")
 qaqc_folder = os.path.join(folder_path, "QAQC")
-raw_folder = os.path.join(folder_path, "Raw")
-prev_wb_path = "/home/nweiss/gdrive/Year 2/Summer - Duwamish/Sampling_Results/2023 Screening Results"
+raw_folder = os.path.join(folder_path, "Lab_Reports")
+prev_wb_path = os.path.join(folder_path, "2023 Screening Results")
 
 # Assign lookup table paths
-sample_pts_path = os.path.join(lookup_folder,"Sampling_Sites_Master_w_river_mile.csv")
+sample_pts_path = os.path.join(lookup_folder,"Sampling_Sites_MASTER.xlsx")
 sl_path = os.path.join(lookup_folder,"Master_Screening_Levels.xlsx")
 pcb_arc_lookup_path = os.path.join(lookup_folder,"PCB_aroclor_lookup.csv")
 fixed_id_path = os.path.join(lookup_folder,"Sample_ID_Fixed.xlsx")

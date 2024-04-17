@@ -54,9 +54,9 @@ def make_result_pivot(df, med, group, name):
 
 # Initiate report parameters
 # You can either specify the samples by their date OR their name depending on your purpose
-event_name = 'TEST' # event name or community group name
-event_ids = ['GUF-1-S-1'] # sample IDs of interest. If you are specifying by date, write empty brackets []
-event_dates = ['2024-01-18'] # sample dates of interest. If you are specifying by ID, write empty brackets []
+event_name = 'Khmer' # event name or community group name
+event_ids = [] # sample IDs of interest. If you are specifying by date, write empty brackets []
+event_dates = ['2024-03-14'] # sample dates of interest. If you are specifying by ID, write empty brackets []
 
 ##### Create report by Sample ID or Sample Date #####
 all_results = pd.read_csv(f"{processed_folder}/agg_results.csv")

@@ -2,8 +2,6 @@ import pandas as pd
 import geopandas as gp
 import numpy as np
 import os
-import requests
-import urllib.parse
 
 def drop_levels(df):
     df.reset_index(inplace = True)
@@ -19,7 +17,6 @@ def clean_pcb(val):
 
 def main(processed_path, prev_wb_path):
     output_results_path = f"{processed_path}/prev_results.csv"
-    subfolder_path = prev_wb_path
 
     # initiate columns to keep in final dataframe
     soil_RCRA_cols = ['DATE', 'SAMP_ID', 'Arsenic', 'Barium', 'Cadmium', 'Chromium', 'Lead','Selenium', 'Silver', 'Mercury']
@@ -37,13 +34,8 @@ def main(processed_path, prev_wb_path):
     soil_pcb = pd.DataFrame()
     water_pcb = pd.DataFrame()
 
-    # list all files in the directory
-    subfolder_path = "/home/nweiss/gdrive/Year 2/Summer - Duwamish/Sampling_Results/2023 Screening Results"
-
     # Use a list comprehension to get all .xlsx files in the subfolder
-    results_files = [f for f in os.listdir(subfolder_path) if f.endswith(".xlsx")]
-    results_files.remove("TEMPLATE_UPD.xlsx")
-    results_files.remove("S4 and S6 Screening Results_CLEAN.xlsx") # this is processed separated in "exceedance_processing.ipynb"
+    results_files = [f for f in os.listdir(prev_wb_path) if f.endswith(".xlsx")]
 
     # soil rcra processing
 

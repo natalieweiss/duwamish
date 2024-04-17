@@ -21,7 +21,7 @@ def main(sample_outing_name, processed_path, sample_pts_path, qaqc_path):
     output_results_path = f"{processed_path}/{sample_outing_name}_results_join_geometry.csv"
 
     # Read in sample points
-    sample_pts = pd.read_csv(sample_pts_path)
+    sample_pts = pd.read_excel(sample_pts_path, sheet_name="Sample_Locations")
     sample_pts_gdf = gp.GeoDataFrame(sample_pts, geometry=gp.points_from_xy(sample_pts.Longitude, sample_pts.Latitude), crs="EPSG:4326")
 
     # Read in processed results
