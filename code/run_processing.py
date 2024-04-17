@@ -1,5 +1,5 @@
-import process_raw_f_and_b_data, add_dioxin_furans, join_to_screening_levels, join_to_sample_points, merge_all_results, combine_prev_screening_results
-import add_dioxin_furans_only, join_df_to_screening_levels
+import process_raw_f_and_b_data, join_to_screening_levels, join_to_sample_points, merge_all_results, combine_prev_screening_results
+import add_dioxin_furans_only
 import os
 import glob
 import pandas as pd
@@ -48,14 +48,14 @@ for i in dioxin_furans_data:
     print(sample_outing_name)
     add_dioxin_furans_only.main(processed_path = processed_folder, sample_outing_name = sample_outing_name, results_df_path = i)
     join_to_screening_levels.main(sample_outing_name = sample_outing_name, processed_path = processed_folder, qaqc_path = qaqc_folder, sl_path = sl_path, pcb_arc_lookup_path = pcb_arc_lookup_path)
-    join_to_sample_points.main(sample_outing_name = sample_outing_name, processed_path = processed_folder, sample_pts_path = sample_pts_path)
+    join_to_sample_points.main(sample_outing_name = sample_outing_name, processed_path = processed_folder, sample_pts_path = sample_pts_path, qaqc_path= qaqc_folder)
 
-# Append results from Pace Labs into the final results table        
+'''# Append results from Pace Labs into the final results table        
 sample_outing_name = "prev_results"
 combine_prev_screening_results.main(processed_path = processed_folder, prev_wb_path = prev_wb_path)
 prev_results = pd.read_csv(f"{processed_folder}/{sample_outing_name}.csv")
 join_to_screening_levels.main(sample_outing_name = sample_outing_name, processed_path = processed_folder, qaqc_path = qaqc_folder, sl_path = sl_path, pcb_arc_lookup_path = pcb_arc_lookup_path)
-join_to_sample_points.main(sample_outing_name = sample_outing_name, processed_path = processed_folder, sample_pts_path = sample_pts_path)
-
+join_to_sample_points.main(sample_outing_name = sample_outing_name, processed_path = processed_folder, sample_pts_path = sample_pts_path, qaqc_path = qaqc_folder)
+'''
 # Merge all of the joined results together
 merge_all_results.main(processed_path = processed_folder)

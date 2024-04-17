@@ -1,6 +1,4 @@
-import process_raw_f_and_b_data, add_dioxin_furans, join_to_screening_levels, join_to_sample_points, merge_all_results
 import os
-import glob
 import pandas as pd
 import numpy as np
 from math import floor, log10
@@ -11,7 +9,7 @@ folder_path = "/home/nweiss/gdrive/Year 2/Summer - Duwamish/Results_NEW"
 # Initiate lookup tables paths
 processed_folder = os.path.join(folder_path, "Processed")
 
-# create mini reports
+# create table of exceedances
 def make_pivot(df, med, group, name):
     df = df[(df['Chemical Group']==group)]
     df = df[df['Medium']==med]
@@ -21,7 +19,7 @@ def make_pivot(df, med, group, name):
     df.sort_values(by = 'Sample ID')
     df.set_index(['Sample ID', 'DATE'], append=True, inplace = True)
 
-    pivot_df = df.pivot(columns=['Chemical Group', 'Chemical','Reference', 'Scenario','Screening Level', 'SL Unit'], values='SL_exceeded')
+    pivot_df = df.pivot(columns=['Chemical Group', 'Chemical','Reference', 'Pathway_for_Report','Screening Level', 'SL Unit'], values='SL_exceeded')
     pivot_df = pivot_df.groupby(['Sample ID', 'DATE']).agg(max)
     pivot_df.replace({1:"Y", 0:"N"}, inplace = True)
     if len(pivot_df)>0:
@@ -32,7 +30,7 @@ def make_pivot(df, med, group, name):
             print(group, med)
             print(e)
 
-# create mini reports
+# create table of results
 def make_result_pivot(df, med, group, name):
     df = df[(df['Chemical Group']==group)]
     df = df[df['Medium']==med]

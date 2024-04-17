@@ -103,12 +103,12 @@ def main(sample_outing_name, qaqc_path, sample_pts_path, fixed_id_path, raw_data
 
     results_df = results_df.merge(fixed_ids, how = 'left', left_on = 'Sample ID', right_on = 'FB_ID', indicator = True)
     results_df['Sample ID'] = np.where(results_df['_merge']=='both', results_df['Fixed_ID'], results_df['Sample ID'])
-    results_df.drop(columns = ['_merge', 'Fixed_ID'])
+    results_df.drop(columns = ['_merge', 'Fixed_ID'], inplace = True)
 
     fixed_dates = pd.read_excel(fixed_id_path, sheet_name = "Dates")
-    results_df = results_df.merge(fixed_dates, how = 'left', left_on = 'Field Collection Date', right_on = 'FB_Date', indicator = True)
-    results_df['Field Collection Date'] = np.where(results_df['_merge']=='both', results_df['Fixed_Date'], results_df['Field Collection Date'])
-    results_df.drop(columns = ['_merge', 'Fixed_Date'])
+    results_df = results_df.merge(fixed_dates, how = 'left', left_on = 'Field Collection Start Date', right_on = 'FB_Date', indicator = True)
+    results_df['Field Collection Start Date'] = np.where(results_df['_merge']=='both', results_df['Fixed_Date'], results_df['Field Collection Start Date'])
+    results_df.drop(columns = ['_merge', 'Fixed_Date'], inplace = True)
 
     # remove any rows that were not field data
     results_df =  results_df[results_df['Field Collection Start Date'].isna() == False]

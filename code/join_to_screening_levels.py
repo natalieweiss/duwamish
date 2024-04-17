@@ -62,20 +62,6 @@ def main(sample_outing_name, processed_path, qaqc_path, sl_path, pcb_arc_lookup_
     # Convert accidental PCBs screening levels to 0
     sl['Screening Level'] = np.where(sl['Screening Level'] == 'Present', 0, sl['Screening Level'])
 
-    # Convert units of the screening leves
-    sl['Screening Level'] = sl['Screening Level'].astype(float)
-    sl['Screening Level'] = np.where((sl['SL Unit'] =='mg/L')  & (sl['Medium'] =='Water'), sl['Screening Level']/1000, sl['Screening Level'])
-    sl['SL Unit'] = np.where(sl['SL Unit']=='mg/L', 'ug/L', sl['SL Unit'])
-
-    sl['Screening Level'] = np.where((sl['SL Unit'] =='ppb') & (sl['Medium'] =='Water'), sl['Screening Level'], sl['Screening Level'])
-    sl['SL Unit'] = np.where(sl['SL Unit']=='ppb', 'ug/L', sl['SL Unit'])
-
-    sl['Screening Level'] = np.where(sl['SL Unit'] =='ppm', sl['Screening Level']/1000, sl['Screening Level'])
-    sl['SL Unit'] = np.where(sl['SL Unit']=='ppm', 'ug/L', sl['SL Unit'])
-
-    sl['Screening Level'] = np.where((sl['SL Unit'] =='ppb') & (sl['Medium'] =='Soil'), sl['Screening Level']*0.001, sl['Screening Level'])
-    sl['SL Unit'] = np.where((sl['SL Unit'] =='ppb') & (sl['Medium'] =='Soil'), 'mg/kg', sl['SL Unit'])
-
     # Export values for QAQC
     sl_qaqc = sl[['Medium', 'Chemical Group','Chemical', 'Scenario','Scenario Detail','Pathway', 'Screening Level']]
     sl_qaqc.drop_duplicates(inplace = True)
@@ -106,6 +92,7 @@ def main(sample_outing_name, processed_path, qaqc_path, sl_path, pcb_arc_lookup_
     # calculate whether the screening levels have been exceeded
     sl_results_join['SL_exceeded'] = np.where(sl_results_join['Screening Level'] <= sl_results_join['Result Value'],'Y','N')
     sl_results_join['SL_diff'] = sl_results_join['Result Value'] - sl_results_join['Screening Level']
+    ## TODO: if there is a U FLAG, put U?
 
     # where the screening level is blank, replace exceedance with "no screening level identified"
     sl_results_join['Screening Level'].fillna('No Screening Level Identified', inplace = True)
