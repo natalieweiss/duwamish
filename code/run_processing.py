@@ -33,10 +33,10 @@ for i in monthly_data:
         metadata_dict[sample_outing_name] = i
         print('processing raw data')
         process_raw_f_and_b_data.main(sample_outing_name = sample_outing_name, processed_path = processed_folder, qaqc_path = qaqc_folder, sample_pts_path = sample_pts_path, raw_data_path= i, fixed_id_path = fixed_id_path)
-        print('adding dioxin furans')
+        print('joining to screening levels')
         join_to_screening_levels.main(sample_outing_name = sample_outing_name, processed_path = processed_folder, qaqc_path = qaqc_folder, sl_path = sl_path, pcb_arc_lookup_path = pcb_arc_lookup_path)
         print('joining to sample points')
-        join_to_sample_points.main(sample_outing_name = sample_outing_name, processed_path = processed_folder, sample_pts_path = sample_pts_path)
+        join_to_sample_points.main(sample_outing_name = sample_outing_name, processed_path = processed_folder, sample_pts_path = sample_pts_path, qaqc_path=qaqc_folder)
     except Exception as e:
         print(e)
 
@@ -50,12 +50,13 @@ for i in dioxin_furans_data:
     join_to_screening_levels.main(sample_outing_name = sample_outing_name, processed_path = processed_folder, qaqc_path = qaqc_folder, sl_path = sl_path, pcb_arc_lookup_path = pcb_arc_lookup_path)
     join_to_sample_points.main(sample_outing_name = sample_outing_name, processed_path = processed_folder, sample_pts_path = sample_pts_path, qaqc_path= qaqc_folder)
 
-'''# Append results from Pace Labs into the final results table        
-sample_outing_name = "prev_results"
+# Append results from Pace Labs into the final results table        
+'''sample_outing_name = "prev_results"
 combine_prev_screening_results.main(processed_path = processed_folder, prev_wb_path = prev_wb_path)
 prev_results = pd.read_csv(f"{processed_folder}/{sample_outing_name}.csv")
 join_to_screening_levels.main(sample_outing_name = sample_outing_name, processed_path = processed_folder, qaqc_path = qaqc_folder, sl_path = sl_path, pcb_arc_lookup_path = pcb_arc_lookup_path)
 join_to_sample_points.main(sample_outing_name = sample_outing_name, processed_path = processed_folder, sample_pts_path = sample_pts_path, qaqc_path = qaqc_folder)
 '''
+
 # Merge all of the joined results together
 merge_all_results.main(processed_path = processed_folder)

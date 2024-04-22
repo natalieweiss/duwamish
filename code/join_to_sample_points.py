@@ -27,7 +27,7 @@ def main(sample_outing_name, processed_path, sample_pts_path, qaqc_path):
     # Read in processed results
     screening_results = pd.read_csv(input_results_path)
     cols = screening_results.columns.to_list()
-    cols += ['Latitude', 'Longitude', 'Description', 'MILE']
+    cols += ['Latitude', 'Longitude', 'Description']
 
     # Strip all sample ids of leading spaces
     screening_results['Sample ID'] = screening_results['Sample ID'].str.strip()

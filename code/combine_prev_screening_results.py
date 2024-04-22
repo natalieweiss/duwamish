@@ -41,7 +41,7 @@ def main(processed_path, prev_wb_path):
 
     for i in results_files:
         try:
-            soil_rcra8_df = pd.read_excel(subfolder_path+'/'+i, sheet_name = 'Soil RCRA8')
+            soil_rcra8_df = pd.read_excel(prev_wb_path+'/'+i, sheet_name = 'Soil RCRA8')
             print(i , "sheet found")
 
             soil_rcra8_df = soil_rcra8_df[1:]
@@ -56,7 +56,7 @@ def main(processed_path, prev_wb_path):
     # water rcra results
     for i in results_files:
         try:
-            water_rcra8_df = pd.read_excel(subfolder_path+'/'+i, sheet_name = 'Water RCRA8')
+            water_rcra8_df = pd.read_excel(prev_wb_path+'/'+i, sheet_name = 'Water RCRA8')
             print(i , "sheet found")
             water_rcra8_df = water_rcra8_df[1:]
             water_rcra8_df = water_rcra8_df[water_RCRA_cols]
@@ -70,7 +70,7 @@ def main(processed_path, prev_wb_path):
     # soil pah results
     for i in results_files:
         try:
-            soil_pah_df = pd.read_excel(subfolder_path+'/'+i, sheet_name = 'PAH Soils')
+            soil_pah_df = pd.read_excel(prev_wb_path+'/'+i, sheet_name = 'PAH Soils')
             print(i , "sheet found")
             soil_pah_df = soil_pah_df[1:]
             soil_pah_df= soil_pah_df[pah_cols]
@@ -84,7 +84,7 @@ def main(processed_path, prev_wb_path):
     # water pah results
     for i in results_files:
         try:
-            water_pah_df = pd.read_excel(subfolder_path+'/'+i, sheet_name = 'PAH Soil to Groundwater')
+            water_pah_df = pd.read_excel(prev_wb_path+'/'+i, sheet_name = 'PAH Soil to Groundwater')
             print(i , "sheet found")
             water_pah_df = water_pah_df[1:]
             water_pah_df= water_pah_df[pah_cols]
@@ -98,7 +98,7 @@ def main(processed_path, prev_wb_path):
     # soil pcb results
     for i in results_files:
         try:
-            soil_pcb_df = pd.read_excel(subfolder_path+'/'+i, sheet_name = 'PCBs Soils')
+            soil_pcb_df = pd.read_excel(prev_wb_path+'/'+i, sheet_name = 'PCBs Soils')
             print(i , "sheet found")
             soil_pcb_df = soil_pcb_df[1:]
             soil_pcb_df= soil_pcb_df[soil_pcb_cols]
@@ -116,7 +116,7 @@ def main(processed_path, prev_wb_path):
     for i in results_files:
 
         try:
-            water_pcb_df = pd.read_excel(subfolder_path+'/'+i, sheet_name = 'PCBs Waters')
+            water_pcb_df = pd.read_excel(prev_wb_path+'/'+i, sheet_name = 'PCBs Waters')
             print(i, "sheet found")
 
             water_pcb_df = water_pcb_df[1:]

@@ -131,11 +131,11 @@ def main(sample_outing_name, processed_path, qaqc_path, sl_path, pcb_arc_lookup_
 
     try:
         columns = ['DATE','Sample ID','Medium', 'Chemical Group', 'Chemical', 'Land Use', 'Target Receptor', 'Transport Pathway', 'Exposure Pathway', 'Scenario', 'Pathway_for_Report', 'Screening Level', 'SL Unit',
-            'Source', 'Source Number','Reference', 'Result Value','Result Value Units','Result Data Qualifier', 'SL_exceeded', 'SL_diff']
+            'Source', 'Source Number','Reference', 'Result Value','Result Value Units','Result Data Qualifier', 'SL_exceeded', 'SL_diff', 'MDL_SL_Flag']
         sl_results_join[columns].to_csv(f'{processed_path}/{output_results_path}.csv', index = False)
     except:
         columns = ['DATE','Sample ID','Medium', 'Chemical Group', 'Chemical', 'Land Use', 'Target Receptor', 'Transport Pathway', 'Exposure Pathway', 'Scenario', 'Pathway_for_Report', 'Screening Level', 'SL Unit',
-        'Source', 'Source Number','Reference', 'Result Value','Result Value Units','SL_exceeded','SL_diff']
+        'Source', 'Source Number','Reference', 'Result Value','Result Value Units','SL_exceeded','SL_diff', 'MDL_SL_Flag']
         sl_results_join[columns].to_csv(f'{processed_path}/{output_results_path}.csv', index = False)
 
     qaqc_df = sl_results_join[sl_results_join['Screening Level'] != 'No Screening Level Identified']

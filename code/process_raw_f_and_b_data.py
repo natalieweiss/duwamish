@@ -58,7 +58,7 @@ def main(sample_outing_name, qaqc_path, sample_pts_path, fixed_id_path, raw_data
     # Iterate through each file and read its content
     for file in files:
         print(f"Processing: {file}")
-        df = pd.read_excel(file, sheet_name = 'Sheet1') # read into a dataframe
+        df = pd.read_excel(file, sheet_name=0) # read first tab of Excel document into a dataframe
         df.columns = df.columns.str.replace("_"," ") # replace underscores in columns to spaces
         df['Sample ID'] = df['Sample ID'].str.strip() # strip the sample IDs of any stray spaces
         results_df.append(df) # append into the results data frame
@@ -79,6 +79,10 @@ def main(sample_outing_name, qaqc_path, sample_pts_path, fixed_id_path, raw_data
 
     # Check against the Master Sampling Sites spreadsheet to see if the IDs match F&B
     # If there is a match that is incorrect, add the ID to the Fixed IDs sheet
+
+    # Replace mismatched IDs from F&B to the correct sampling ID
+    fixed_ids = pd.read_excel(fixed_id_path, sheet_name = "IDs")
+
     sample_pts_gdf = pd.read_excel(sample_pts_path, sheet_name='Sample_Locations')
     sample_pt_ids = sample_pts_gdf['Sampling ID'].unique()
     no_match = []
@@ -89,17 +93,15 @@ def main(sample_outing_name, qaqc_path, sample_pts_path, fixed_id_path, raw_data
             else:
                 if ("Method Blank" not in f_b_id):
                     if f_b_id[0:2] != "0_":
-                        no_match.append(f_b_id)
+                        if f_b_id not in fixed_ids['FB_ID'].unique():
+                            no_match.append(f_b_id)
     
-    print('No matches found for these IDs:', no_match)
     if len(no_match)>0:
+        print('No matches found for these IDs:', no_match)
         pd.DataFrame(no_match).drop_duplicates().to_csv(f"{qaqc_path}/{sample_outing_name}_missing_IDs.csv")
 
     if len(no_match)>0:
         print('Add corrected IDs to the Fixed ID spreadsheet')
-
-    # Replace mismatched IDs from F&B to the correct sampling ID
-    fixed_ids = pd.read_excel(fixed_id_path, sheet_name = "IDs")
 
     results_df = results_df.merge(fixed_ids, how = 'left', left_on = 'Sample ID', right_on = 'FB_ID', indicator = True)
     results_df['Sample ID'] = np.where(results_df['_merge']=='both', results_df['Fixed_ID'], results_df['Sample ID'])
