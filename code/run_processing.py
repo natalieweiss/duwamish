@@ -5,6 +5,8 @@ import glob
 import pandas as pd
 
 # Input your file path for the root directory here
+# The file path should look like this: "C:\\duwamish_code"
+# All file paths need to have double backslash (\\) as the separators
 folder_path = "/home/nweiss/gdrive/Year 2/Summer - Duwamish/Results_NEW"
 
 # Initiate lookup tables paths from the root folder
@@ -15,8 +17,8 @@ raw_folder = os.path.join(folder_path, "Lab_Reports")
 prev_wb_path = os.path.join(folder_path, "2023 Screening Results")
 
 # Assign lookup table paths
-sample_pts_path = os.path.join(lookup_folder,"Sampling_Sites_MASTER.xlsx")
-sl_path = os.path.join(lookup_folder,"Master_Screening_Levels.xlsx")
+sample_pts_path = os.path.join(lookup_folder,"Sampling_Sites_MASTER.xlsx") # all sample ids, dates, and geometries (lat long in decimal degrees)
+sl_path = os.path.join(lookup_folder,"Master_Screening_Levels.xlsx")  
 pcb_arc_lookup_path = os.path.join(lookup_folder,"PCB_aroclor_lookup.csv")
 fixed_id_path = os.path.join(lookup_folder,"Sample_ID_Fixed.xlsx")
 
