@@ -58,7 +58,7 @@ def main(sample_outing_name, qaqc_path, sample_pts_path, fixed_id_path, raw_data
     # Iterate through each file and read its content
     for file in files:
         print(f"Processing: {file}")
-        df = pd.read_excel(file, sheet_name=0) # read first tab of Excel document into a dataframe
+        df = pd.read_excel(file, sheet_name='Sheet1', engine = 'xlrd') # read first tab of Excel document into a dataframe
         df.columns = df.columns.str.replace("_"," ") # replace underscores in columns to spaces
         df['Sample ID'] = df['Sample ID'].str.strip() # strip the sample IDs of any stray spaces
         results_df.append(df) # append into the results data frame
@@ -103,17 +103,25 @@ def main(sample_outing_name, qaqc_path, sample_pts_path, fixed_id_path, raw_data
     if len(no_match)>0:
         print('Add corrected IDs to the Fixed ID spreadsheet')
 
+    # Join and replace all F_B IDs with Fixed IDs
     results_df = results_df.merge(fixed_ids, how = 'left', left_on = 'Sample ID', right_on = 'FB_ID', indicator = True)
     results_df['Sample ID'] = np.where(results_df['_merge']=='both', results_df['Fixed_ID'], results_df['Sample ID'])
     results_df.drop(columns = ['_merge', 'Fixed_ID'], inplace = True)
 
+    # Join and replace all F_B dates with Fixed dates
     fixed_dates = pd.read_excel(fixed_id_path, sheet_name = "Dates")
     results_df = results_df.merge(fixed_dates, how = 'left', left_on = 'Field Collection Start Date', right_on = 'FB_Date', indicator = True)
     results_df['Field Collection Start Date'] = np.where(results_df['_merge']=='both', results_df['Fixed_Date'], results_df['Field Collection Start Date'])
     results_df.drop(columns = ['_merge', 'Fixed_Date'], inplace = True)
 
-    # remove any rows that were not field data
+    # Remove any rows that were not field data
     results_df =  results_df[results_df['Field Collection Start Date'].isna() == False]
+
+    # Remove any duplicate rows of chemicals and keep the value with the most recent lab analysis date
+    results_df.sort_values(by = 'Lab Analysis Date', ascending = False, inplace = True)
+    results_df.drop_duplicates(subset = ['Sample ID', 'Field Collection Start Date', 'Sample Matrix','Result Parameter Name'], inplace = True)
+
+    # Create metadata for QAQC output
     file_path.append(processed_path)
     records.append(len(results_df))
     sample_ids.append(results_df['Sample ID'].unique())
@@ -142,7 +150,7 @@ def main(sample_outing_name, qaqc_path, sample_pts_path, fixed_id_path, raw_data
     results_df = pd.concat([results_df, tot_pcbs])
 
     # remove unnecessary columns from raw data
-    results_df = results_df[['Sample ID','Field Collection Start Date','Sample Matrix_clean','Sample Matrix','Sample Source',
+    results_df = results_df[['Sample ID','Field Collection Start Date', 'Lab Analysis Date', 'Sample Matrix_clean','Sample Matrix','Sample Source',
                             'Result Parameter Name','Result Parameter Name_clean','Result Value', 'Result Value Units', 'Result Reporting Limit', 
                             'Result Reporting Limit Type', 'Result Detection Limit','Result Detection Limit Type', 'Result Data Qualifier', 'Result Method']]
 

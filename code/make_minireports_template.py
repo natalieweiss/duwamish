@@ -1,6 +1,4 @@
-import process_raw_f_and_b_data, add_dioxin_furans, join_to_screening_levels, join_to_sample_points, merge_all_results
 import os
-import glob
 import pandas as pd
 import numpy as np
 from math import floor, log10
@@ -54,9 +52,10 @@ def make_result_pivot(df, med, group, name):
 
 # Initiate report parameters
 # You can either specify the samples by their date OR their name depending on your purpose
-event_name = 'TEST' # event name or community group name
-event_ids = ['RSD-1-W-1'] # sample IDs of interest. If you are specifying by date, write empty brackets []
-event_dates = [] # sample dates of interest. If you are specifying by ID, write empty brackets []
+event_name = 'Simon' # event name or community group name
+event_ids = ['RSD-1-W-1', 'EAO-1-S-1'] # sample IDs of interest. If you are specifying by date, write empty brackets []
+event_dates = [] # sample dates of interest in YYYY-MM-DD format. If you are specifying by ID, write empty brackets []
+# TODO: add example date format
 
 ##### Create report by Sample ID or Sample Date #####
 all_results = pd.read_csv(f"{processed_folder}/agg_results.csv")

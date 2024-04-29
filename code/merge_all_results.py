@@ -29,6 +29,7 @@ def main(processed_path):
     sl_results = pd.concat(sl_results)
     sl_geom_results = pd.concat(sl_geom_results)
 
+    # Remove all rows where result is blank
     sl_results = sl_results[sl_results['Result Value'].isna()==False]
     sl_geom_results = sl_geom_results[sl_geom_results['Result Value'].isna()==False]
 

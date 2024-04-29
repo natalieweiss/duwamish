@@ -39,7 +39,7 @@ def main(sample_outing_name, processed_path, sample_pts_path, qaqc_path):
         print("date not included")
     
     # Join sample points geometry to the results based on sample ID
-    sample_pts_gdf["Date"] = pd.to_datetime(sample_pts_gdf["Date"], format='mixed')
+    sample_pts_gdf["Date"] = pd.to_datetime(sample_pts_gdf["Date"], format='mixed').astype("datetime64[ns]")
     sample_pts_join_results = pd.merge(screening_results, sample_pts_gdf, left_on = ['Sample ID', 'DATE'], right_on = ['Sampling ID', 'Date'], how = 'left')
     sample_pts_join_results.rename(columns = {'Medium_x':'Medium'}, inplace = True)
 

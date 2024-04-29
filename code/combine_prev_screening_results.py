@@ -42,7 +42,7 @@ def main(processed_path, prev_wb_path):
     for i in results_files:
         try:
             soil_rcra8_df = pd.read_excel(prev_wb_path+'/'+i, sheet_name = 'Soil RCRA8')
-            print(i , "sheet found")
+            print(i , "Soil RCRA sheet found")
 
             soil_rcra8_df = soil_rcra8_df[1:]
             soil_rcra8_df = soil_rcra8_df[soil_RCRA_cols]
@@ -50,56 +50,60 @@ def main(processed_path, prev_wb_path):
             soil_rcra8_df['Result Value Units'] = 'mg/kg'
             soil_rcra8_df['Sample Matrix'] = 'Soil'
             soil_rcra= pd.concat([soil_rcra, soil_rcra8_df], ignore_index= True)
-        except:
-            print(i, "no sheet")
+        except Exception as e:
+            print(i, "no Soil RCRA sheet")
+            print(e)
 
     # water rcra results
     for i in results_files:
         try:
             water_rcra8_df = pd.read_excel(prev_wb_path+'/'+i, sheet_name = 'Water RCRA8')
-            print(i , "sheet found")
+            print(i , "Water RCRA sheet found")
             water_rcra8_df = water_rcra8_df[1:]
             water_rcra8_df = water_rcra8_df[water_RCRA_cols]
             water_rcra8_df = water_rcra8_df.melt(id_vars=['DATE','SAMP_ID'])
             water_rcra8_df['Result Value Units'] = 'ug/L'
             water_rcra8_df['Sample Matrix'] = 'Water'
             water_rcra= pd.concat([water_rcra, water_rcra8_df], ignore_index= True)
-        except:
-            print(i, "no sheet")
+        except Exception as e:
+            print(i, "no Water RCRA sheet")
+            print(e)
 
     # soil pah results
     for i in results_files:
         try:
             soil_pah_df = pd.read_excel(prev_wb_path+'/'+i, sheet_name = 'PAH Soils')
-            print(i , "sheet found")
+            print(i , "Soil PAH sheet found")
             soil_pah_df = soil_pah_df[1:]
-            soil_pah_df= soil_pah_df[pah_cols]
+            #soil_pah_df= soil_pah_df[pah_cols]
             soil_pah_df = soil_pah_df.melt(id_vars=['DATE','SAMP_ID'])
             soil_pah_df['Result Value Units'] = 'mg/kg'
             soil_pah_df['Sample Matrix'] = 'Soil'
             soil_pah = pd.concat([soil_pah, soil_pah_df], ignore_index= True)
-        except:
-            print(i, "no sheet found")
+        except Exception as e:
+            print(i, "no Soil PAH sheet found")
+            print(e)
 
     # water pah results
     for i in results_files:
         try:
             water_pah_df = pd.read_excel(prev_wb_path+'/'+i, sheet_name = 'PAH Soil to Groundwater')
-            print(i , "sheet found")
+            print(i , "Water PAH sheet found")
             water_pah_df = water_pah_df[1:]
-            water_pah_df= water_pah_df[pah_cols]
+            #water_pah_df= water_pah_df[pah_cols]
             water_pah_df = water_pah_df.melt(id_vars=['DATE','SAMP_ID'])
             water_pah_df['Result Value Units'] = 'ug/L'
             water_pah_df['Sample Matrix'] = 'Water'
             water_pah = pd.concat([water_pah, water_pah_df], ignore_index= True)
-        except:
-            print(i, "no sheet found")
+        except Exception as e:
+            print(i, "no Water PAH sheet found")
+            print(e)
 
     # soil pcb results
     for i in results_files:
         try:
             soil_pcb_df = pd.read_excel(prev_wb_path+'/'+i, sheet_name = 'PCBs Soils')
-            print(i , "sheet found")
+            print(i , "PCBs Soils sheet found")
             soil_pcb_df = soil_pcb_df[1:]
             soil_pcb_df= soil_pcb_df[soil_pcb_cols]
             soil_pcb_df = soil_pcb_df.melt(id_vars=['DATE','SAMP_ID','PCB Isomer'])
@@ -109,15 +113,16 @@ def main(processed_path, prev_wb_path):
             soil_pcb_df['Sample Matrix'] = 'Soil'
             soil_pcb_df['PCB_flag'] = 1
             soil_pcb = pd.concat([soil_pcb, soil_pcb_df], ignore_index= True)
-        except:
-            print(i, "no sheet found")
+        except Exception as e:
+            print(i, "PCBs Soils no sheet found")
+            print(e)
 
     # water pcb results
     for i in results_files:
 
         try:
-            water_pcb_df = pd.read_excel(prev_wb_path+'/'+i, sheet_name = 'PCBs Waters')
-            print(i, "sheet found")
+            water_pcb_df = pd.read_excel(prev_wb_path+'/'+i, sheet_name = 'PCB Waters')
+            print(i, "PCB Waters sheet found")
 
             water_pcb_df = water_pcb_df[1:]
 
@@ -130,7 +135,7 @@ def main(processed_path, prev_wb_path):
             water_pcb_df['PCB_flag'] = 1
             water_pcb = pd.concat([water_pcb, water_pcb_df], ignore_index= True)
         except Exception as e:
-            print(i, "no sheet found")
+            print(i, "no PCB Waters sheet found")
             print(e)
 
     ## merge all results
@@ -143,11 +148,12 @@ def main(processed_path, prev_wb_path):
     all_results['Result Value'] = np.where(all_results['Result Value']=='--',np.NaN,all_results['Result Value'])
 
     # clean up pcb values in order to make the join correctly with screening levels
-    all_results['Result Parameter Name_clean'] = all_results['Result Parameter Name'].apply(lambda x: clean_pcb(x))
+    #print(all_results['Result Parameter Name'].unique())
+    #all_results['Result Parameter Name_clean'] = all_results['Result Parameter Name'].apply(lambda x: clean_pcb(x))
 
     # clean up d/f results to join correctly with screening levels
     # replace Lube Oil to Diesel Range Organics
-    all_results['Result Parameter Name_clean'] = np.where(all_results['Result Parameter Name_clean'] == 'Lube Oil', 'Diesel Range Organics', all_results['Result Parameter Name_clean'])
+    all_results['Result Parameter Name_clean'] = np.where(all_results['Result Parameter Name'] == 'Lube Oil', 'Diesel Range Organics', all_results['Result Parameter Name'])
 
     # calculate total PCBs for epa1668
     tot_pcbs = all_results[all_results['PCB_flag'] == 1]
@@ -158,5 +164,9 @@ def main(processed_path, prev_wb_path):
 
     # export compiled results
     all_results = pd.concat([all_results, tot_pcbs])
+    all_results = all_results[all_results['Result Value']!='Y']
+    all_results = all_results[all_results['Result Value']!='N']
+    all_results['Result Value'] = all_results['Result Value'].astype(float)
+    all_results['DATE'] = pd.to_datetime(all_results['DATE'], format="%Y-%m-%d %H:%M:%S").astype("datetime64[ns]")
     all_results.to_csv(output_results_path,index = False)
 
