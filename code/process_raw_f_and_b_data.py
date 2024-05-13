@@ -117,8 +117,8 @@ def main(sample_outing_name, qaqc_path, sample_pts_path, fixed_id_path, raw_data
     # Remove any rows that were not field data
     results_df =  results_df[results_df['Field Collection Start Date'].isna() == False]
 
-    # Remove any duplicate rows of chemicals and keep the value with the most recent lab analysis date
-    results_df.sort_values(by = 'Lab Analysis Date', ascending = False, inplace = True)
+    # Remove any duplicate rows of chemicals and keep the values with the lowest MRL value
+    results_df.sort_values(by = 'Result Detection Limit', ascending = True, inplace = True)
     results_df.drop_duplicates(subset = ['Sample ID', 'Field Collection Start Date', 'Sample Matrix','Result Parameter Name'], inplace = True)
 
     # Create metadata for QAQC output
