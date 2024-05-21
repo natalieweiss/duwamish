@@ -8,6 +8,11 @@ from math import floor, log10
 # All file paths need to have double backslash (\\) as the separators
 folder_path = "/home/nweiss/gdrive/Year 2/Summer - Duwamish/Results_NEW"
 
+
+## TODO: DEBUG
+'''c:\duwamish_code\duwamish-main\duwamish-main\code\make_minireports_template.py:52: FutureWarning: The provided callable <built-in function max> is currently using DataFrameGroupBy.max. In a future version of pandas, the provided callable will be used directly. To keep current behavior pass the string "max" instead.
+  pivot_df = pivot_df.groupby(['Sample ID', 'DATE']).agg(max)'''
+
 # Initiate report parameters
 # You can either specify the samples by their date OR their name depending on your purpose
 event_name = 'DRCC' # event name or community group name

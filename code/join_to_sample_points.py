@@ -52,5 +52,5 @@ def main(sample_outing_name, processed_path, sample_pts_path, qaqc_path):
     # Export IDs with missing geometries to a table
     missing_ids = sample_pts_join_results[sample_pts_join_results['Latitude'].isna()]
     if len(missing_ids)>0:
-        missing_ids[['DATE', 'Sample ID', 'Sampling ID', 'Medium', 'Latitude', 'Longitude','Description']].to_csv(f"{qaqc_path}/{sample_outing_name}_missing_pts.csv", index = False)
+        missing_ids[['DATE', 'Sample ID', 'Sampling ID', 'Medium', 'Latitude', 'Longitude','Description']].drop_duplicates().to_csv(f"{qaqc_path}/{sample_outing_name}_missing_pts.csv", index = False)
 
