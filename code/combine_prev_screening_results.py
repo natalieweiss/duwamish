@@ -2,6 +2,7 @@ import pandas as pd
 import geopandas as gp
 import numpy as np
 import os
+import regex as re
 
 def drop_levels(df):
     df.reset_index(inplace = True)
@@ -19,7 +20,7 @@ def main(processed_path, prev_wb_path):
     output_results_path = f"{processed_path}/prev_results.csv"
 
     # initiate columns to keep in final dataframe
-    soil_RCRA_cols = ['DATE', 'SAMP_ID', 'Arsenic', 'Barium', 'Cadmium', 'Chromium', 'Lead','Selenium', 'Silver', 'Mercury']
+    soil_RCRA_cols = ['DATE', 'SAMP_ID', 'Arsenic', 'Barium', 'Cadmium', 'Chromium', 'Lead','Selenium', 'Silver']
     water_RCRA_cols = ['DATE', 'SAMP_ID', 'Arsenic', 'Barium', 'Cadmium', 'Chromium', 'Lead', 'Selenium', 'Silver', 'Mercury (CVAFS)', 'Mercury (CVAA)']
     pah_cols = ['DATE','SAMP_ID','1-Methylnaphthalene', '2-Methylnaphthalene', 'Acenaphthene', 'Acenaphthylene', 'Anthracene', 'Benzo(a)anthracene', 'Benzo(a)pyrene', 'Benzo(b)fluoranthene', 'Benzo(g,h,i)perylene', 'Benzo(k)fluoranthene', 'Chrysene', 'Dibenz(a,h)anthracene', 'Fluoranthene', 'Fluorene', 'Indeno(1,2,3-cd)pyrene', 'Naphthalene', 'Phenanthrene', 'Pyrene', '2-Fluorobiphenyl (S) %', 'Terphenyl-d14 (S) %']
     soil_pcb_cols = ['DATE', 'SAMP_ID', 'PCB Isomer','Concentrations Detected (mg/Kg)']
@@ -45,11 +46,16 @@ def main(processed_path, prev_wb_path):
             print(i , "Soil RCRA sheet found")
 
             soil_rcra8_df = soil_rcra8_df[1:]
+            for col in soil_rcra8_df.columns:
+                if re.match(r"Mercury.*", col):
+                    mercury_col_name = col
+                    soil_RCRA_cols.append(mercury_col_name)
             soil_rcra8_df = soil_rcra8_df[soil_RCRA_cols]
             soil_rcra8_df = soil_rcra8_df.melt(id_vars=['DATE','SAMP_ID'])
             soil_rcra8_df['Result Value Units'] = 'mg/kg'
             soil_rcra8_df['Sample Matrix'] = 'Soil'
             soil_rcra= pd.concat([soil_rcra, soil_rcra8_df], ignore_index= True)
+            soil_RCRA_cols.remove(mercury_col_name)
         except Exception as e:
             print(i, "no Soil RCRA sheet")
             print(e)

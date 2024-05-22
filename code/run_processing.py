@@ -58,7 +58,7 @@ for i in dioxin_furans_data:
     join_to_screening_levels.main(sample_outing_name = sample_outing_name, processed_path = processed_folder, qaqc_path = qaqc_folder, sl_path = sl_path, pcb_arc_lookup_path = pcb_arc_lookup_path)
     join_to_sample_points.main(sample_outing_name = sample_outing_name, processed_path = processed_folder, sample_pts_path = sample_pts_path, qaqc_path= qaqc_folder)
 
-
+    
 # Append results from Pace Labs into the final results table        
 sample_outing_name = "prev_results"
 combine_prev_screening_results.main(processed_path = processed_folder, prev_wb_path = prev_wb_path)

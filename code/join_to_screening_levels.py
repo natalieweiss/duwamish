@@ -33,19 +33,6 @@ def main(sample_outing_name, processed_path, qaqc_path, sl_path, pcb_arc_lookup_
     
     results_df = pd.read_csv(input_results_path)
 
-    # Convert units of the results
-    # convert units from pg/L -> ug/L
-    results_df['Result Value'] = np.where(results_df['Result Value Units']=='pg/L', results_df['Result Value']/1000000, results_df['Result Value'])
-    results_df['Result Value Units'] = np.where(results_df['Result Value Units']=='pg/L', 'ug/L', results_df['Result Value Units'])
-
-    # convert units from mg/L -> ug/L
-    results_df['Result Value'] = np.where(results_df['Result Value Units']=='mg/L', results_df['Result Value']/1000, results_df['Result Value'])
-    results_df['Result Value Units'] = np.where(results_df['Result Value Units']=='mg/L', 'ug/L', results_df['Result Value Units'])
-
-    # convert units pg/g -> mg/kg
-    results_df['Result Value'] = np.where(results_df['Result Value Units']=='pg/g', results_df['Result Value']/1000000, results_df['Result Value'])
-    results_df['Result Value Units'] = np.where(results_df['Result Value Units']=='pg/g', 'mg/kg', results_df['Result Value Units'])
-
     # create data frame of the screening levels for soils and
     sl_soil_df = pd.read_excel(sl_path, sheet_name='Soil')
     sl_water_df = pd.read_excel(sl_path, sheet_name='Water')
@@ -92,12 +79,12 @@ def main(sample_outing_name, processed_path, qaqc_path, sl_path, pcb_arc_lookup_
     # calculate whether the screening levels have been exceeded
     sl_results_join['SL_exceeded'] = np.where(sl_results_join['Screening Level'] <= sl_results_join['Result Value'],'Y','N')
     sl_results_join['SL_diff'] = sl_results_join['Result Value'] - sl_results_join['Screening Level']
-    ## TODO: if there is a U FLAG, put U?
 
     # where the screening level is blank, replace exceedance with "no screening level identified"
     sl_results_join['Screening Level'].fillna('No Screening Level Identified', inplace = True)
     sl_results_join['SL_exceeded'] = np.where(sl_results_join['Screening Level']=='No Screening Level Identified','No Screening Level Identified', sl_results_join['SL_exceeded'])
 
+    # remove any rows that don't have a sample ID
     sl_results_join.dropna(subset=['Sample ID'], inplace=True)
     sl_results_join.rename(columns = {'Field Collection Start Date': 'DATE'}, inplace = True)
 
@@ -128,7 +115,9 @@ def main(sample_outing_name, processed_path, qaqc_path, sl_path, pcb_arc_lookup_
     """
 
     sl_results_join['Chemical'] = np.where(sl_results_join['Screening Level']=='No Screening Level Identified', sl_results_join['Result Parameter Name'], sl_results_join['Chemical'])
+    sl_results_join['Chemical'] = np.where(sl_results_join['Chemical Group'] == 'PCB', sl_results_join['F_B_fmt'], sl_results_join['Chemical'])
 
+    
     try:
         columns = ['DATE','Sample ID','Medium', 'Chemical Group', 'Chemical', 'Land Use', 'Target Receptor', 'Transport Pathway', 'Exposure Pathway', 'Scenario', 'Pathway_for_Report', 'Screening Level', 'SL Unit',
             'Source', 'Source Number','Reference', 'Result Value','Result Value Units','Result Data Qualifier', 'Result Detection Limit', 'SL_exceeded', 'SL_diff', 'MDL_SL_Flag']
@@ -139,7 +128,7 @@ def main(sample_outing_name, processed_path, qaqc_path, sl_path, pcb_arc_lookup_
         sl_results_join[columns].to_csv(f'{processed_path}/{output_results_path}.csv', index = False)
 
     qaqc_df = sl_results_join[sl_results_join['Screening Level'] != 'No Screening Level Identified']
-    qaqc_df= qaqc_df[['DATE','Sample ID', 'Medium', 'Chemical Group','Chemical','Result Value']]
+    qaqc_df= qaqc_df[['DATE','Sample ID', 'Medium', 'Chemical Group','Chemical','Result Value', 'Result Value Units']]
     qaqc_df.drop_duplicates(inplace = True)
     qaqc_df.to_csv(f'{qaqc_path}/{output_results_path}_qaqc.csv', index = False)
 
