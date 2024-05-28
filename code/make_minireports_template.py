@@ -63,6 +63,7 @@ def make_result_pivot(df, med, group, name):
 ##### Create report by Sample ID or Sample Date #####
 all_results = pd.read_csv(f"{processed_folder}/agg_results.csv")
 all_results['DATE'] = all_results['DATE'].str[:10]
+all_results.sort_values(by = 'DATE', inplace = True)
 results_df = []
 
 if len(event_ids) > 0:

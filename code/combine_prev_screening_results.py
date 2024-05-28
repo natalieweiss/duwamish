@@ -21,7 +21,7 @@ def main(processed_path, prev_wb_path):
 
     # initiate columns to keep in final dataframe
     soil_RCRA_cols = ['DATE', 'SAMP_ID', 'Arsenic', 'Barium', 'Cadmium', 'Chromium', 'Lead','Selenium', 'Silver']
-    water_RCRA_cols = ['DATE', 'SAMP_ID', 'Arsenic', 'Barium', 'Cadmium', 'Chromium', 'Lead', 'Selenium', 'Silver', 'Mercury (CVAFS)', 'Mercury (CVAA)']
+    water_RCRA_cols = ['DATE', 'SAMP_ID', 'Arsenic', 'Barium', 'Cadmium', 'Lead', 'Selenium', 'Silver']
     pah_cols = ['DATE','SAMP_ID','1-Methylnaphthalene', '2-Methylnaphthalene', 'Acenaphthene', 'Acenaphthylene', 'Anthracene', 'Benzo(a)anthracene', 'Benzo(a)pyrene', 'Benzo(b)fluoranthene', 'Benzo(g,h,i)perylene', 'Benzo(k)fluoranthene', 'Chrysene', 'Dibenz(a,h)anthracene', 'Fluoranthene', 'Fluorene', 'Indeno(1,2,3-cd)pyrene', 'Naphthalene', 'Phenanthrene', 'Pyrene', '2-Fluorobiphenyl (S) %', 'Terphenyl-d14 (S) %']
     soil_pcb_cols = ['DATE', 'SAMP_ID', 'PCB Isomer','Concentrations Detected (mg/Kg)']
     water_pcb_cols = ['DATE', 'SAMP_ID', 'PCB Isomer','Concentrations Detected (ug/L)']
@@ -65,12 +65,19 @@ def main(processed_path, prev_wb_path):
         try:
             water_rcra8_df = pd.read_excel(prev_wb_path+'/'+i, sheet_name = 'Water RCRA8')
             print(i , "Water RCRA sheet found")
+
+            water_rcra8_df = water_rcra8_df[1:]
+            for col in water_rcra8_df.columns:
+                if re.match(r"Mercury.*", col):
+                    mercury_col_name = col
+                    water_RCRA_cols.append(mercury_col_name)
             water_rcra8_df = water_rcra8_df[1:]
             water_rcra8_df = water_rcra8_df[water_RCRA_cols]
             water_rcra8_df = water_rcra8_df.melt(id_vars=['DATE','SAMP_ID'])
             water_rcra8_df['Result Value Units'] = 'ug/L'
             water_rcra8_df['Sample Matrix'] = 'Water'
             water_rcra= pd.concat([water_rcra, water_rcra8_df], ignore_index= True)
+            water_RCRA_cols.remove(mercury_col_name)
         except Exception as e:
             print(i, "no Water RCRA sheet")
             print(e)
@@ -143,6 +150,8 @@ def main(processed_path, prev_wb_path):
         except Exception as e:
             print(i, "no PCB Waters sheet found")
             print(e)
+
+    # TODO: water TPH results
 
     ## merge all results
     all_results = pd.concat([soil_rcra,soil_pah,soil_pcb,water_rcra, water_pah, water_pcb])

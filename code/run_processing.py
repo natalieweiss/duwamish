@@ -24,6 +24,7 @@ fixed_id_path = os.path.join(lookup_folder,"Sample_ID_Fixed.xlsx")
 
 # Initiate folder paths of raw data
 monthly_data = glob.glob(f"{raw_folder}/*", recursive = True)
+print(monthly_data)
 
 # Initiate empty dictionary to store all of the metadata, including sampling name and file path
 metadata_dict = {}

@@ -77,6 +77,11 @@ def main(sample_outing_name, qaqc_path, sample_pts_path, fixed_id_path, raw_data
     results_df = pd.concat(results_df)
     results_df['Sample ID'] = results_df['Sample ID'].str.strip()
 
+    # Export all sample IDs and the methods run for them
+    method_by_sample_id = results_df.drop_duplicates(subset = ['Sample ID', 'Result Method'])
+    method_by_sample_id.sort_values(by = 'Sample ID', inplace = True)
+    method_by_sample_id[['Sample ID', 'Result Method']].to_csv(f"{qaqc_path}/{sample_outing_name}_samples_analysis_methods.csv", index = False)
+
     # Check against the Master Sampling Sites spreadsheet to see if the IDs match F&B
     # If there is a match that is incorrect, add the ID to the Fixed IDs sheet
 
@@ -101,7 +106,7 @@ def main(sample_outing_name, qaqc_path, sample_pts_path, fixed_id_path, raw_data
         pd.DataFrame(no_match).drop_duplicates().to_csv(f"{qaqc_path}/{sample_outing_name}_missing_IDs.csv")
 
     if len(no_match)>0:
-        print('Add corrected IDs to the Fixed ID spreadsheet')
+        print('Email F&B with typo to get new reports')
 
     # Join and replace all F_B IDs with Fixed IDs
     results_df = results_df.merge(fixed_ids, how = 'left', left_on = 'Sample ID', right_on = 'FB_ID', indicator = True)
