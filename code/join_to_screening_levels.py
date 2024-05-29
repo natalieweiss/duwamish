@@ -117,12 +117,13 @@ def main(sample_outing_name, processed_path, qaqc_path, sl_path, pcb_arc_lookup_
     sl_results_join['Chemical'] = np.where(sl_results_join['Screening Level']=='No Screening Level Identified', sl_results_join['Result Parameter Name'], sl_results_join['Chemical'])
     sl_results_join['Chemical'] = np.where(sl_results_join['Chemical Group'] == 'PCB', sl_results_join['F_B_fmt'], sl_results_join['Chemical'])
 
-    
-    try:
+    # remove unnecessary columns
+    # keep the columns used in the final agg_results.csv file
+    try: # these are the columns for F&B reports
         columns = ['DATE','Sample ID','Medium', 'Chemical Group', 'Chemical', 'Land Use', 'Target Receptor', 'Transport Pathway', 'Exposure Pathway', 'Scenario', 'Pathway_for_Report', 'Screening Level', 'SL Unit',
             'Source', 'Source Number','Reference', 'Result Value','Result Value Units','Result Data Qualifier', 'Result Detection Limit', 'SL_exceeded', 'SL_diff', 'MDL_SL_Flag']
         sl_results_join[columns].to_csv(f'{processed_path}/{output_results_path}.csv', index = False)
-    except:
+    except: # these are the columns used for Pace labs
         columns = ['DATE','Sample ID','Medium', 'Chemical Group', 'Chemical', 'Land Use', 'Target Receptor', 'Transport Pathway', 'Exposure Pathway', 'Scenario', 'Pathway_for_Report', 'Screening Level', 'SL Unit',
         'Source', 'Source Number','Reference', 'Result Value','Result Value Units','SL_exceeded','SL_diff', 'MDL_SL_Flag']
         sl_results_join[columns].to_csv(f'{processed_path}/{output_results_path}.csv', index = False)
