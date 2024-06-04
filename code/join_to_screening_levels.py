@@ -15,7 +15,6 @@ def main(sample_outing_name, processed_path, qaqc_path, sl_path, pcb_arc_lookup_
     This function takes in the following inputs:
     sample_outing_name, str: month and year of the raw data processed
     qaqc_path, str: the path of the QAQC folder
-    sample_pts_path, str: path of the Master Sampling Sites spreadsheet to check for matching sample IDs
     processed_path, str: path for output file 
     sl_path, str: path for Master screening level spreadsheet
     pcb_arc_lookup_path: path for lookup table cross referencing PCB congener formulas with PCB numbers and aroclor
@@ -60,7 +59,6 @@ def main(sample_outing_name, processed_path, qaqc_path, sl_path, pcb_arc_lookup_
     # Strip pcbs of their commas to match the results spreadsheet
     sl['Chemical_fmt'] = np.where(sl['Chemical Group']== 'PCB', sl['Chemical'].str.replace(',',''), sl['Chemical'])
 
-
     #### JOIN SCREENING LEVELS TO RESULTS ###
 
     # create data frames of the raw data and the lookup
@@ -91,29 +89,6 @@ def main(sample_outing_name, processed_path, qaqc_path, sl_path, pcb_arc_lookup_
     sl_results_join['Medium'] = np.where(sl_results_join['Medium'].isna() == True, sl_results_join['Sample Matrix_clean'], sl_results_join['Medium'])
     sl_results_join['Chemical_fmt'] = np.where(sl_results_join['Chemical_fmt'].isna() == True, sl_results_join['Result Parameter Name'], sl_results_join['Chemical_fmt'])
 
-    # CALCUALTE MOST STRINGENT AND COUNT OF STRINGENT EXCEEDED
-    """
-    sl_arc_join = sl_arc_join[sl_arc_join['Screening Level']!='N/A']
-    sl_arc_join = sl_arc_join[(sl_arc_join['Screening Level']!='na')]
-    sl_arc_join = sl_arc_join[(sl_arc_join['Screening Level']!='TBD')]
-    sl_arc_join = sl_arc_join[(sl_arc_join['Screening Level']!='PQL')]
-    sl_arc_join = sl_arc_join[(sl_arc_join['Screening Level']!='No Screening Level Identified')]
-    sl_arc_join['Screening Level'] = sl_arc_join['Screening Level'].astype(float)
-
-    # find the most stringent screening level for each scenario
-    sl_stringent = sl_arc_join.groupby(by =['Medium', 'Chemical Group', 'Chemical_fmt', 'Scenario']).agg({'Screening Level': ['min']}).reset_index()
-    sl_stringent = drop_levels(sl_stringent)
-
-    #For the results that signify most stringent, add column indicating stringent value for filtering
-    sl_results_join = sl_results_join.merge(sl_stringent, how = 'left', indicator = True, on = ['Medium', 'Chemical Group', 'Chemical_fmt', 'Scenario'])
-    sl_results_join['stringent_ind'] = np.where(sl_results_join['_merge']=='both', 'Stringent','')
-    
-    
-
-    sl_results_join.drop(columns = 'Screening Level_y', inplace = True)
-    sl_results_join.rename(columns = {'Screening Level_x':'Screening Level'}, inplace = True)
-    """
-
     sl_results_join['Chemical'] = np.where(sl_results_join['Screening Level']=='No Screening Level Identified', sl_results_join['Result Parameter Name'], sl_results_join['Chemical'])
     sl_results_join['Chemical'] = np.where(sl_results_join['Chemical Group'] == 'PCB', sl_results_join['F_B_fmt'], sl_results_join['Chemical'])
 
@@ -121,11 +96,11 @@ def main(sample_outing_name, processed_path, qaqc_path, sl_path, pcb_arc_lookup_
     # keep the columns used in the final agg_results.csv file
     try: # these are the columns for F&B reports
         columns = ['DATE','Sample ID','Medium', 'Chemical Group', 'Chemical', 'Land Use', 'Target Receptor', 'Transport Pathway', 'Exposure Pathway', 'Scenario', 'Pathway_for_Report', 'Screening Level', 'SL Unit',
-            'Source', 'Source Number','Reference', 'Result Value','Result Value Units','Result Data Qualifier', 'Result Detection Limit', 'SL_exceeded', 'SL_diff', 'MDL_SL_Flag']
+            'Source', 'Source Number','Reference', 'Result Value','Result Value Units','Result Data Qualifier', 'Result Detection Limit', 'SL_exceeded', 'SL_diff', 'MDL_SL_Flag', 'RAL Definition']
         sl_results_join[columns].to_csv(f'{processed_path}/{output_results_path}.csv', index = False)
     except: # these are the columns used for Pace labs
         columns = ['DATE','Sample ID','Medium', 'Chemical Group', 'Chemical', 'Land Use', 'Target Receptor', 'Transport Pathway', 'Exposure Pathway', 'Scenario', 'Pathway_for_Report', 'Screening Level', 'SL Unit',
-        'Source', 'Source Number','Reference', 'Result Value','Result Value Units','SL_exceeded','SL_diff', 'MDL_SL_Flag']
+        'Source', 'Source Number','Reference', 'Result Value','Result Value Units','SL_exceeded','SL_diff', 'MDL_SL_Flag', 'RAL Definition']
         sl_results_join[columns].to_csv(f'{processed_path}/{output_results_path}.csv', index = False)
 
     qaqc_df = sl_results_join[sl_results_join['Screening Level'] != 'No Screening Level Identified']

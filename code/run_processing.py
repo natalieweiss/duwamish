@@ -49,7 +49,7 @@ for i in monthly_data:
         #raise
         continue
 
-
+'''
 # Individually add in Dioxin Furans
 dioxin_furans_data = glob.glob(f"{processed_folder}/Dioxin Furans/*", recursive = True)
 for i in dioxin_furans_data:
@@ -68,6 +68,7 @@ prev_results = pd.read_csv(f"{processed_folder}/{sample_outing_name}.csv")
 join_to_screening_levels.main(sample_outing_name = sample_outing_name, processed_path = processed_folder, qaqc_path = qaqc_folder, sl_path = sl_path, pcb_arc_lookup_path = pcb_arc_lookup_path)
 join_to_sample_points.main(sample_outing_name = sample_outing_name, processed_path = processed_folder, sample_pts_path = sample_pts_path, qaqc_path = qaqc_folder)
 
+'''
 
 # Merge all of the joined results together
 merge_all_results.main(processed_path = processed_folder)

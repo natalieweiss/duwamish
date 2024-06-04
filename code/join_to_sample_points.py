@@ -41,7 +41,11 @@ def main(sample_outing_name, processed_path, sample_pts_path, qaqc_path):
     # Join sample points geometry to the results based on sample ID
     sample_pts_gdf["Date"] = pd.to_datetime(sample_pts_gdf["Date"], format='mixed').astype("datetime64[ns]")
     sample_pts_join_results = pd.merge(screening_results, sample_pts_gdf, left_on = ['Sample ID', 'DATE'], right_on = ['Sampling ID', 'Date'], how = 'left')
-    sample_pts_join_results.rename(columns = {'Medium_x':'Medium'}, inplace = True)
+    sample_pts_join_results['RAL Definition_x'] = sample_pts_join_results['RAL Definition_x'].replace(np.nan, 'None')
+    sample_pts_join_results['RAL Definition_y'] = sample_pts_join_results['RAL Definition_y'].replace(np.nan, 'None')
+    sample_pts_join_results['RAL Flag'] = sample_pts_join_results.apply(lambda x: int(x['RAL Definition_y'] ==x['RAL Definition_x']), axis=1)
+    sample_pts_join_results = sample_pts_join_results[sample_pts_join_results['RAL Flag']==1]
+    sample_pts_join_results.rename(columns = {'Medium_x':'Medium', 'RAL Definition_y': 'RAL Definition'}, inplace = True)
 
     sample_pts_join_results_gdf = gp.GeoDataFrame(sample_pts_join_results)
     sample_pts_join_results_gdf['Date'] = sample_pts_join_results_gdf['Date'].astype(str)

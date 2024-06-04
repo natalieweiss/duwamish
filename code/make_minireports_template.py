@@ -11,9 +11,9 @@ folder_path = "/home/nweiss/gdrive/Year 2/Summer - Duwamish/Results_NEW"
 
 # Initiate report parameters
 # You can either specify the samples by their date OR their name depending on your purpose
-event_name = 'Dirt Corps' # event name or community group name
+event_name = 'DRCC' # event name or community group name
 event_ids = [] # sample IDs of interest. If you are specifying by date, write empty brackets []
-event_dates = ['2024-05-01'] # sample dates of interest in YYYY-MM-DD with leading 0s for month and date. If you are specifying by ID, write empty brackets []
+event_dates = [] # sample dates of interest in YYYY-MM-DD with leading 0s for month and date. If you are specifying by ID, write empty brackets []
 
 # Initiate lookup tables paths
 processed_folder = os.path.join(folder_path, "Processed")
