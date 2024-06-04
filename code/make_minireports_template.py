@@ -11,9 +11,9 @@ folder_path = "/home/nweiss/gdrive/Year 2/Summer - Duwamish/Results_NEW"
 
 # Initiate report parameters
 # You can either specify the samples by their date OR their name depending on your purpose
-event_name = 'DRCC_All Results' # event name or community group name
+event_name = 'Dirt Corps' # event name or community group name
 event_ids = [] # sample IDs of interest. If you are specifying by date, write empty brackets []
-event_dates = [] # sample dates of interest in YYYY-MM-DD without leading 0s for days or months. If you are specifying by ID, write empty brackets []
+event_dates = ['2024-05-01'] # sample dates of interest in YYYY-MM-DD with leading 0s for month and date. If you are specifying by ID, write empty brackets []
 
 # Initiate lookup tables paths
 processed_folder = os.path.join(folder_path, "Processed")
@@ -63,26 +63,26 @@ def make_result_pivot(df, med, group, name):
 ##### Create report by Sample ID or Sample Date #####
 all_results = pd.read_csv(f"{processed_folder}/agg_results.csv")
 all_results['DATE'] = all_results['DATE'].str[:10]
-all_results.sort_values(by = 'DATE', inplace = True)
+all_results['Chemical']= all_results['Chemical'].str.strip()
+all_results.sort_values(by = ['DATE', 'Chemical'], inplace = True)
 results_df = []
 
 if len(event_ids) > 0:
+    print(f'ids included in report: {event_ids}')
     for sample_id in event_ids:
-        print(f'ids included in report: {event_ids}')
         df = all_results[all_results['Sample ID'] == sample_id]
         results_df.append(df)
-else:
-    print('no ids provided')
-    results_df.append(all_results)
-
-if len(event_ids) > 0:
+    
+if len(event_dates) > 0:
     for sample_date in event_dates:
         print(f'dates included in report: {event_dates}')
         df = all_results[all_results['DATE'] == sample_date]
         results_df.append(df)
-else:
-    print('no dates provided')
-    results_df.append(all_results)
+
+if len(event_dates) == 0:
+    if len(event_ids) == 0:
+        print('all dates and ids included in report')
+        results_df.append(all_results)
 
 results_df = pd.concat(results_df)
 results_df.drop_duplicates(inplace = True)

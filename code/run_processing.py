@@ -29,7 +29,7 @@ print(monthly_data)
 # Initiate empty dictionary to store all of the metadata, including sampling name and file path
 metadata_dict = {}
 
-# Loop through each month of raw data collected and process to join screening levels
+# Loop through each month of F&B raw data collected and process to join screening levels
 for i in monthly_data:
     try:
         sample_outing_name = os.path.basename(i)
@@ -48,6 +48,7 @@ for i in monthly_data:
         print(f"Unexpected {err=}, {type(err)=}")
         #raise
         continue
+
 
 # Individually add in Dioxin Furans
 dioxin_furans_data = glob.glob(f"{processed_folder}/Dioxin Furans/*", recursive = True)
